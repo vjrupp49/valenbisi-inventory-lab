@@ -21,4 +21,5 @@ jobs:
       - run: pytest -q
       # dbt models run against the small SYNTHETIC sample committed in dbt/sample_data (not real data).
       - name: dbt build on synthetic sample
-        run: dbt build --project-dir dbt --profiles-dir dbt --vars '{data_root: dbt/sample_data}'
+        run: |
+          dbt build --project-dir dbt --profiles-dir dbt --vars '{data_root: dbt/sample_data}'
