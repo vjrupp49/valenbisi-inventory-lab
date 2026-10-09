@@ -58,3 +58,5 @@
 - Added `.github/workflows/health.yml`: daily watchdog that opens a GitHub issue if collection stalls/sparse.
 - ingest.yml cron changed from `*/10` to `7,17,27,37,47,57` (same frequency, off the busiest minutes) because only 1 scheduled run
   fired in ~7 h. Verify over the next days with check_data.py; if still sparse, consider an external trigger (Cloudflare Worker calling workflow_dispatch).
+- 2026-10-09: GitHub cron still ~1 run per 7 h. Added `cloudflare/` Worker (10-min timer calling workflow_dispatch) per Vincent's go-ahead.
+  Token lives only as a Cloudflare secret. Once verified, consider removing the GitHub schedule so the feed is not hit twice.
