@@ -39,6 +39,9 @@
 - duckdb R package not installed here, so the dashboard reads CSV exports rather than the DuckDB file.
 - CI: first run failed on invalid YAML in ci.yml (colon in a plain scalar); fixed, PR check green.
 
-## Questions for Vincent
-- Is 1-hour staleness the right cutoff once daytime data exists? Overnight, 267/272 stations were stale in the single snapshot.
-- Want the dashboard to read DuckDB directly (needs R `duckdb` package)?
+## Decisions (made autonomously, previously open questions)
+- Staleness cutoff stays at 1 hour (`stale_after_hours` in dbt/dbt_project.yml). Reason: it matches the collector's
+  `n_stale_1h`, and the KPI mart reports rates with and without stale snapshots so the choice stays visible.
+  Revisit once several daytime days exist; changing it is a one-line var edit.
+- Dashboard keeps reading CSV exports. Reason: avoids installing an extra R package and keeps R needs to shiny/ggplot2/dplyr.
+  Switching to DuckDB directly is optional later.
