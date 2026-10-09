@@ -45,3 +45,8 @@
   Revisit once several daytime days exist; changing it is a one-line var edit.
 - Dashboard keeps reading CSV exports. Reason: avoids installing an extra R package and keeps R needs to shiny/ggplot2/dplyr.
   Switching to DuckDB directly is optional later.
+
+## 2026-10-09 15:05 UTC check
+- ingest.yml active; first scheduled run succeeded (13:05 UTC). Only 2 snapshots total; 427 min gap. See findings doc.
+- 269/272 stations stale at ~15:05 local: overnight-quiet explanation not supported.
+- PR #1 open, mergeable, CI green. Not merged (per rules).

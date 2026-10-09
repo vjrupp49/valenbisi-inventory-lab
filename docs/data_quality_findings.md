@@ -36,3 +36,15 @@ gaps, run cadence, error rates over time and station activity cannot be assessed
 `git -C data_repo pull` and a re-run of `check_data.py` still showed 1 run and 1 snapshot. The only run
 so far is the manual `workflow_dispatch` run; no scheduled (cron) run had fired yet, so scheduled
 collection is **not yet verified**. Check `gh run list --workflow ingest.yml` and the `data` branch.
+
+## Update 2026-10-09 15:05 UTC (first scheduled run seen)
+Source: `check_data.py` after `git -C data_repo pull`: 2 runs, 0 errors.
+- Scheduled (cron) collection works: one `schedule`-triggered run succeeded at 13:05 UTC.
+- But cadence is far below the nominal 10 minutes: the gap between the two runs is 427 minutes (about 7 h),
+  and no other scheduled run happened in that time. Measured by `fct_run_health`, as intended. Whether this
+  improves over the next days is unknown; this is a limitation to watch, not a fix we can apply
+  (the rules forbid editing `ingest.yml` without a proven bug, or raising request frequency).
+- Staleness: 269 of 272 installed stations were still stale (>1 h) at 13:05 UTC, which is mid-afternoon in
+  Valencia (about 15:05 local). So the earlier "maybe overnight quiet" explanation is not supported by this
+  data point; stale `last_reported` looks common in the daytime too. Two snapshots are still too few to
+  conclude why, so the staleness handling in the models stays important.
