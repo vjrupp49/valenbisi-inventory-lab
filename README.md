@@ -73,7 +73,7 @@ python src/check_data.py data_repo     # health report: gaps, errors, feed fresh
 
 ## Run locally (Python 3.11+)
 ```bash
-python -m venv .venv && source .venv/bin/activate        # on Windows: .venvScriptsctivate (cmd) or .venvScriptsActivate.ps1
+python -m venv .venv && source .venv/bin/activate        # Windows: .venv/Scripts/activate
 pip install -r requirements.txt -r requirements-dbt.txt
 pytest -q
 
