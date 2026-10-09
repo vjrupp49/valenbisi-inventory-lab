@@ -56,3 +56,5 @@
   CLAUDE.md hard rules 1, 2, 5 and `.claude/settings.json` updated. Still off-limits: force-push, deleting repo/data branch,
   enabling public Pages without a specific ask, secrets in files, fabricated results.
 - Added `.github/workflows/health.yml`: daily watchdog that opens a GitHub issue if collection stalls/sparse.
+- ingest.yml cron changed from `*/10` to `7,17,27,37,47,57` (same frequency, off the busiest minutes) because only 1 scheduled run
+  fired in ~7 h. Verify over the next days with check_data.py; if still sparse, consider an external trigger (Cloudflare Worker calling workflow_dispatch).
