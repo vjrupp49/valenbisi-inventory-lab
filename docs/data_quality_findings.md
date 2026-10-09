@@ -31,3 +31,8 @@ gaps, run cadence, error rates over time and station activity cannot be assessed
   stored values are UTC instants.
 - `src/check_data.py` crashes on Windows consoles with a cp1252 encoding error unless run with
   `PYTHONUTF8=1`. Not a data problem.
+
+## Update (end of overnight build)
+`git -C data_repo pull` and a re-run of `check_data.py` still showed 1 run and 1 snapshot. The only run
+so far is the manual `workflow_dispatch` run; no scheduled (cron) run had fired yet, so scheduled
+collection is **not yet verified**. Check `gh run list --workflow ingest.yml` and the `data` branch.

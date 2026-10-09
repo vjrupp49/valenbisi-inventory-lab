@@ -25,3 +25,20 @@
 ## Notes
 - `rm -rf` is denied by overnight settings; used PowerShell Remove-Item only for a generated untracked sample dir.
 - Bash heredocs with long mixed content failed to parse once; files written with the Write tool instead.
+- [x] 6 Forecast scaffold `src/forecast/` (features w/ leakage tests, 3 models, rolling-origin backtest, Brier/skill/ECE).
+      Developed on SYNTHETIC data only. CLI refuses real-data scores below 14 days.
+- [x] 7 Simulation scaffold `src/simulate/` (config.toml = all assumptions; 4 policies; common random numbers; tests).
+- [x] 8 Dashboard skeleton `dashboard/app.R` (smoke-tested with shiny::testServer on synthetic exports),
+      `src/export_marts.py`, `docs/methodology.md`.
+- [x] 9 CI extended: installs dbt-duckdb, runs pytest + `dbt build` on `dbt/sample_data` (synthetic).
+- [x] 10 README updated to match what exists.
+
+## Blocked / not verified
+- Scheduled cron collection NOT verified: at the end of the build `data` branch still had only the manual run
+  (1 snapshot). New-repo cron can take a while to start; check `gh run list --workflow ingest.yml`.
+- duckdb R package not installed here, so the dashboard reads CSV exports rather than the DuckDB file.
+- CI itself not yet seen green on GitHub until the PR runs.
+
+## Questions for Vincent
+- Is 1-hour staleness the right cutoff once daytime data exists? Overnight, 267/272 stations were stale in the single snapshot.
+- Want the dashboard to read DuckDB directly (needs R `duckdb` package)?

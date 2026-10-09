@@ -7,23 +7,32 @@ station is a stockout, and rebalancing trucks are replenishment. This project co
 feed continuously, models it in SQL (DuckDB + dbt), forecasts stockouts, and simulates which
 rebalancing policy would have prevented the most of them.
 
-> **Status: data collection live.** Analytics, forecasting and the dashboard are being built in
-> public. See the roadmap below. Nothing on this page claims a result I have not produced yet.
+> **Status: data collection started; modeling, forecasting and simulation scaffolds exist but are
+> developed and tested on synthetic data only.** No forecast score, segment or key result from real
+> data is reported here, because the collected history is still far too short (see
+> [docs/data_quality_findings.md](docs/data_quality_findings.md)).
 
 ## Why this project
 Inventory theory (ABC/XYZ segmentation, safety stock, service levels) transfers directly to
 bike-share operations, and a public live feed makes it checkable by anyone.
 
-## Architecture (current)
+## Architecture
 
 ```
-Valenbisi GBFS v3  ─┐
-                    ├─► GitHub Actions (every ~10 min) ─► Parquet snapshots ─► `data` branch
-Open-Meteo weather ─┘        src/ingest.py                 (Hive-partitioned)
+Valenbisi GBFS v3  -+
+                    +-> GitHub Actions (cron */10) -> Parquet snapshots -> `data` branch
+Open-Meteo weather -+        src/ingest.py            (Hive-partitioned)
+                                                           |
+                  dbt + DuckDB (dbt/): staging -> dim/fct -> KPI + ABC/XYZ marts
+                                                           |
+          src/forecast (baselines, GBM, rolling-origin backtest)    dashboard/ (Shiny skeleton)
+          src/simulate (Monte Carlo rebalancing policies)
 ```
 
-Planned: DuckDB + dbt models (staging → intermediate → marts) → forecasting + simulation →
-Shiny dashboard + dbt docs site.
+What exists: ingestion with tests; dbt project with 39 passing checks on a synthetic sample (and on the
+real data, which is one snapshot so far); stockout/blockout KPI mart and ABC/XYZ segmentation (both
+flagged provisional until 14 days); forecasting scaffold; assumption-driven simulation scaffold;
+a Shiny dashboard skeleton fed by CSV exports. Method details: [docs/methodology.md](docs/methodology.md).
 
 ## Data
 | Table | Grain | Notes |
@@ -50,20 +59,37 @@ python src/check_data.py data_repo     # health report: gaps, errors, feed fresh
 
 ## Roadmap
 - [x] Ingestion pipeline + tests + CI
-- [ ] DuckDB + dbt staging/marts with tests and docs
-- [ ] Service-level KPIs (stockout/blockout rates by station and hour)
-- [ ] ABC/XYZ station segmentation
-- [ ] Stockout forecasting with rolling-origin backtests (Brier score, calibration)
-- [ ] Rebalancing-policy Monte Carlo simulation
+- [x] DuckDB + dbt staging/marts with schema tests (synthetic sample in CI)
+- [x] Service-level KPI mart (stockout/blockout by station and hour, with coverage columns)
+- [x] ABC/XYZ segmentation (provisional until 14 days)
+- [x] Forecasting scaffold: persistence, hour-of-week, gradient boosting, rolling-origin backtest, Brier + calibration
+      (real scores withheld until >= 14 days; the CLI enforces this)
+- [x] Rebalancing Monte Carlo scaffold (all assumptions in `src/simulate/config.toml`)
+- [x] Dashboard skeleton (Shiny; needs R with shiny, ggplot2, dplyr)
+- [ ] Real forecasting results (needs 14+ days of data)
+- [ ] Simulation parameters estimated from real data
 - [ ] Weather and event effects (permutation tests, FDR correction)
 - [ ] Public dashboard
 
-## Run locally
+## Run locally (Python 3.11+)
 ```bash
-pip install -r requirements.txt
+python -m venv .venv && source .venv/bin/activate        # on Windows: .venvScriptsctivate (cmd) or .venvScriptsActivate.ps1
+pip install -r requirements.txt -r requirements-dbt.txt
 pytest -q
-python src/ingest.py --out data_repo      # one live snapshot
+
+# model the data (real data in data_repo/, or the SYNTHETIC sample)
+dbt build --project-dir dbt --profiles-dir dbt --vars '{data_root: dbt/sample_data}'
+dbt build --project-dir dbt --profiles-dir dbt                 # uses data_repo/
+
+# synthetic-data development of the forecaster, and the simulation
+python src/forecast/run.py --db dbt/target/valenbisi.duckdb --synthetic
+python src/simulate/run.py
+
+# dashboard (uses CSV exports of the marts)
+python src/export_marts.py --db dbt/target/valenbisi.duckdb --out dashboard/data
+Rscript -e 'shiny::runApp("dashboard")'
 ```
+On Windows consoles set `PYTHONUTF8=1` before running `src/check_data.py`.
 
 ## Attribution
 Station data: Valenbisi / JCDecaux, JCDecaux Open Licence. Weather: Open-Meteo.com (CC BY 4.0).
