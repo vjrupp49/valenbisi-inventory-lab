@@ -37,7 +37,7 @@
 - Scheduled cron collection NOT verified: at the end of the build `data` branch still had only the manual run
   (1 snapshot). New-repo cron can take a while to start; check `gh run list --workflow ingest.yml`.
 - duckdb R package not installed here, so the dashboard reads CSV exports rather than the DuckDB file.
-- CI itself not yet seen green on GitHub until the PR runs.
+- CI: first run failed on invalid YAML in ci.yml (colon in a plain scalar); fixed, PR check green.
 
 ## Questions for Vincent
 - Is 1-hour staleness the right cutoff once daytime data exists? Overnight, 267/272 stations were stale in the single snapshot.
