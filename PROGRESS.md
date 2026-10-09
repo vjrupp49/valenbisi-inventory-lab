@@ -50,3 +50,9 @@
 - ingest.yml active; first scheduled run succeeded (13:05 UTC). Only 2 snapshots total; 427 min gap. See findings doc.
 - 269/272 stations stale at ~15:05 local: overnight-quiet explanation not supported.
 - PR #1 open, mergeable, CI green. Not merged (per rules).
+
+## 2026-10-09 permissions change (Vincent, in chat)
+- Vincent lifted the overnight restrictions: Claude may edit/push `main`, edit workflows and ingest code, merge PRs.
+  CLAUDE.md hard rules 1, 2, 5 and `.claude/settings.json` updated. Still off-limits: force-push, deleting repo/data branch,
+  enabling public Pages without a specific ask, secrets in files, fabricated results.
+- Added `.github/workflows/health.yml`: daily watchdog that opens a GitHub issue if collection stalls/sparse.

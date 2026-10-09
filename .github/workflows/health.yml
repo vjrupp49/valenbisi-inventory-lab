@@ -1,0 +1,47 @@
+name: health
+
+# Daily watchdog for data collection. Read-only on the data; opens ONE GitHub issue (you get an email)
+# if the collector looks stalled or very sparse. It never touches the data branch.
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Alert if the newest snapshot is older than this many hours, or fewer than this many in 24 h.
+      MAX_AGE_HOURS: "6"
+      MIN_RUNS_24H: "24"
+    steps:
+      - name: Measure collection
+        id: m
+        run: |
+          set -e
+          since=$(date -u -d '24 hours ago' +%Y-%m-%dT%H:%M:%SZ)
+          last=$(gh api "repos/$GITHUB_REPOSITORY/branches/data" -q .commit.commit.committer.date)
+          n=$(gh api "repos/$GITHUB_REPOSITORY/commits?sha=data&since=$since&per_page=100" --paginate -q '.[].sha' | wc -l)
+          age_h=$(( ( $(date -u +%s) - $(date -u -d "$last" +%s) ) / 3600 ))
+          echo "newest snapshot: $last (${age_h} h ago); snapshots in last 24 h: $n"
+          echo "last=$last" >> "$GITHUB_OUTPUT"
+          echo "n=$n" >> "$GITHUB_OUTPUT"
+          echo "age_h=$age_h" >> "$GITHUB_OUTPUT"
+
+      - name: Open an issue if unhealthy
+        if: ${{ steps.m.outputs.age_h > env.MAX_AGE_HOURS || steps.m.outputs.n < env.MIN_RUNS_24H }}
+        run: |
+          title="Data collection looks unhealthy"
+          existing=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "$title in:title" --json number -q '.[0].number')
+          body="Newest snapshot: ${{ steps.m.outputs.last }} (${{ steps.m.outputs.age_h }} h ago). Snapshots in last 24 h: ${{ steps.m.outputs.n }} (nominal is about 144). Thresholds: older than ${MAX_AGE_HOURS} h or fewer than ${MIN_RUNS_24H} per day. Check the Actions tab (ingest workflow)."
+          if [ -z "$existing" ]; then
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"
+          else
+            gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" --body "$body"
+          fi
