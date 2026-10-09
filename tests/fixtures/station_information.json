@@ -1,0 +1,4 @@
+{"last_updated":"2099-01-01T11:00:00Z","ttl":3600,"version":"3.0","data":{"stations":[
+{"station_id":"1","name":[{"text":"01_PLAZA TEST","language":"es"}],"lat":39.47,"lon":-0.37,"capacity":25},
+{"station_id":"2","name":"02_PLAIN STRING NAME","lat":39.48,"lon":-0.36,"capacity":15}
+]}}

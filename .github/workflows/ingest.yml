@@ -1,0 +1,70 @@
+name: ingest
+
+# Scheduled workflows only run from the default branch (main).
+# GitHub cron is best-effort: runs drift and occasionally skip. That is measured, not hidden
+# (see run_meta + src/check_data.py).
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ingest
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-ingest.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements-ingest.txt
+
+      - name: Prepare data branch
+        run: |
+          set -e
+          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git ls-remote --exit-code --heads "$REMOTE" data >/dev/null 2>&1; then
+            git clone --depth 1 --branch data "$REMOTE" data_repo
+          else
+            mkdir data_repo
+            cd data_repo
+            git init -b data
+            git remote add origin "$REMOTE"
+          fi
+
+      - name: Snapshot feeds
+        run: python src/ingest.py --out data_repo
+
+      - name: Commit and push to data branch
+        working-directory: data_repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing to commit"
+            exit 0
+          fi
+          git commit -m "data: $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
+          for i in 1 2 3; do
+            if git push origin data; then
+              exit 0
+            fi
+            git pull --rebase origin data || true
+          done
+          echo "Push failed after 3 attempts" >&2
+          exit 1
