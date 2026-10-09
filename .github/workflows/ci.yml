@@ -14,6 +14,12 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-          cache-dependency-path: requirements.txt
-      - run: pip install -r requirements.txt
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dbt.txt
+      - run: pip install -r requirements.txt -r requirements-dbt.txt
       - run: pytest -q
+      # dbt models run against the small SYNTHETIC sample committed in dbt/sample_data (not real data).
+      - name: dbt build on synthetic sample
+        run: |
+          dbt build --project-dir dbt --profiles-dir dbt --vars '{data_root: dbt/sample_data}'

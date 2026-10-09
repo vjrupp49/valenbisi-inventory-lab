@@ -8,3 +8,9 @@ data_repo/
 *.duckdb
 *.duckdb.wal
 .DS_Store
+dbt/target/
+dbt/logs/
+dbt/dbt_packages/
+logs/
+.scratch_synth/
+dashboard/data/

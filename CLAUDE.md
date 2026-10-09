@@ -7,15 +7,17 @@ rebalancing = replenishment). Collect the live Valenbisi GBFS feed, model it in 
 then forecast stockouts and simulate rebalancing policies. Quality and honesty matter more than scope.
 
 ## Hard rules (never break these)
-1. **Never touch `main` directly.** Work on branch `overnight`; push only `origin overnight`.
-   The scheduled collector runs from `main`, and a broken `ingest.yml` or `ingest.py` silently stops data collection.
-2. **Do not edit `.github/workflows/ingest.yml` or `src/ingest.py`** unless fixing a proven bug,
-   with a test that fails before the fix and passes after. Note it in PROGRESS.md.
+1. **Branches (updated 2026-10-09 by Vincent):** the overnight restrictions are lifted. Claude may commit to and push `main`
+   (and edit `.github/workflows/*`, `src/ingest.py`, and the `data` branch workflow) when the change is tested.
+   Because the scheduled collector runs from `main`, a broken `ingest.yml` or `ingest.py` silently stops data collection:
+   so run `pytest -q`, validate workflow YAML, and confirm the next scheduled run after any change to them.
+2. **Changes to the collector** (`ingest.yml`, `src/ingest.py`): log the change and reason in PROGRESS.md and verify afterwards.
 3. **No fabricated results.** Never put a number, chart, finding or "key result" in the README or any
    doc unless a script in this repo produced it from real collected data. Short history is a
    limitation to state, not hide. Use synthetic data only for tests and clearly label it.
 4. **No secrets, tokens or personal data** in files, logs or commits.
-5. **No force-pushes, no deleting branches/repos, no enabling GitHub Pages or other public publishing.**
+5. **No force-pushes, no deleting the repo or the `data` branch.** Enabling GitHub Pages or other public publishing
+   still needs Vincent's explicit ask for that specific thing.
 6. **Respect the data sources:** JCDecaux Open Licence (attribute), Open-Meteo CC BY 4.0. Do not
    increase request frequency or add scraping.
 7. Do not read `data_repo/` as if it were source code; it is data.

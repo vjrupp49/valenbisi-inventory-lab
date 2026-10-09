@@ -1,0 +1,42 @@
+# Every number below is an ASSUMPTION, not an estimate from the Valenbisi data. Results from this
+# simulator are illustrations of how policies compare under these assumptions only. Replace the
+# demand block with values estimated from real data once enough history exists, and say so.
+
+[system]
+n_stations = 60
+capacity_min = 15            # docks per station, drawn uniformly in [min, max]
+capacity_max = 30
+initial_fill = 0.5           # fraction of capacity holding a bike at the start
+n_days = 5                   # simulated days per replication (state carries across days)
+
+[demand]
+# Mean trips (pickups) per station per day, scaled by a per-station popularity factor.
+mean_pickups_per_station_day = 40.0
+popularity_sigma = 0.5       # lognormal sigma of per-station popularity
+morning_peak_hour = 8.5      # commute pulses; pulse(h) = +1 near morning peak, -1 near evening peak
+evening_peak_hour = 18.5
+peak_width_h = 1.5
+direction_sd = 0.5           # per-station commute direction ~ N(0, sd), clipped to [-0.9, 0.9]
+imbalance_strength = 0.8     # how strongly the direction skews pickups vs returns during pulses
+day_noise_sigma = 0.25       # lognormal day-to-day multiplicative noise per station (unforecastable part)
+
+[rebalancing]
+round_hours = [6, 10, 14, 18]   # hours of day at which a rebalancing round happens
+n_trucks = 2
+truck_capacity = 12             # bikes per single transfer (one pickup stop + one drop stop)
+transfers_per_truck_per_round = 3
+cost_per_transfer = 1.0         # abstract cost unit; only used to compare policies at equal budget
+target_fill = 0.5               # post-rebalancing target fraction of capacity
+lookahead_h = 4                 # hours ahead the forecast-driven policy plans for
+static_route_stations = 20      # static policy only ever visits this fixed set (chosen at random once)
+
+[forecast]
+# The forecast-driven policy sees the TRUE expected net outflow over the lookahead window,
+# degraded by noise: f_hat = f * (1 + N(0, rel_noise)) + N(0, abs_noise). rel_noise large = bad forecaster.
+# This is a knob representing forecast skill, not a fitted model.
+rel_noise = 0.3
+abs_noise = 1.0
+
+[monte_carlo]
+n_replications = 200
+seed = 42
