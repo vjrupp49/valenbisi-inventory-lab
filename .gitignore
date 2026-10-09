@@ -12,3 +12,4 @@ dbt/target/
 dbt/logs/
 dbt/dbt_packages/
 logs/
+.scratch_synth/
