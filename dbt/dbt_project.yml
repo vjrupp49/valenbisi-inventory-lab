@@ -1,0 +1,38 @@
+name: valenbisi
+version: "0.1.0"
+config-version: 2
+profile: valenbisi
+
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+
+vars:
+  # Where the Hive-partitioned parquet lives, relative to this dbt/ directory (run dbt from the repo root
+  # with --project-dir dbt, or from dbt/ itself; paths below resolve against the current directory).
+  # Real data: data_repo     CI / demo (SYNTHETIC): dbt/sample_data
+  data_root: data_repo
+  # A snapshot is "stale" when the station last reported more than this long before the snapshot.
+  stale_after_hours: 1
+  # Activity (abs change in bike count) is only counted between snapshots at most this far apart.
+  max_delta_gap_minutes: 30
+  # Segmentation / KPI results are marked provisional until this many distinct days exist.
+  min_days_final: 14
+  # A day only counts toward segmentation when it has at least this many snapshots (~10 min cadence => ~144/day max).
+  min_snapshots_per_day: 24
+  # ABC: cumulative share of activity. A = top 80 %, B = next 15 %, C = rest.
+  abc_a_cutoff: 0.80
+  abc_b_cutoff: 0.95
+  # XYZ: coefficient of variation (sd/mean) of daily activity.
+  xyz_x_max_cv: 0.5
+  xyz_y_max_cv: 1.0
+  # Run-health checks
+  max_run_gap_hours: 3
+  check_recency: false
+
+models:
+  valenbisi:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table

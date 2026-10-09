@@ -1,0 +1,67 @@
+version: 2
+
+models:
+  - name: stg_station_status
+    columns:
+      - name: station_id
+        tests: [not_null]
+      - name: snapshot_ts
+        tests: [not_null]
+  - name: stg_run_meta
+    columns:
+      - name: snapshot_ts
+        tests: [not_null, unique]
+      - name: ok
+        tests: [not_null]
+  - name: dim_station
+    columns:
+      - name: station_id
+        tests: [not_null, unique]
+  - name: fct_station_snapshot
+    columns:
+      - name: snapshot_key
+        tests: [not_null, unique]
+      - name: station_id
+        tests:
+          - not_null
+          - relationships: {arguments: {to: ref('dim_station'), field: station_id}}
+      - name: hour_of_day
+        tests:
+          - not_null
+          - accepted_values: {arguments: {values: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23], quote: false}}
+      - name: day_of_week
+        tests:
+          - accepted_values: {arguments: {values: [1,2,3,4,5,6,7], quote: false}}
+      - name: is_stale
+        tests: [not_null]
+      - name: is_stockout
+        tests: [not_null]
+  - name: fct_station_hour
+    columns:
+      - name: station_hour_key
+        tests: [not_null, unique]
+      - name: station_id
+        tests:
+          - relationships: {arguments: {to: ref('dim_station'), field: station_id}}
+  - name: fct_run_health
+    columns:
+      - name: snapshot_ts
+        tests: [not_null, unique]
+  - name: kpi_service_level
+    columns:
+      - name: hour_of_day
+        tests:
+          - not_null
+          - accepted_values: {arguments: {values: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23], quote: false}}
+      - name: n_days_observed
+        tests: [not_null]
+  - name: seg_station_abc_xyz
+    columns:
+      - name: station_id
+        tests: [not_null, unique]
+      - name: abc_class
+        tests:
+          - accepted_values: {arguments: {values: ['A','B','C','n/a']}}
+      - name: xyz_class
+        tests:
+          - accepted_values: {arguments: {values: ['X','Y','Z','n/a']}}

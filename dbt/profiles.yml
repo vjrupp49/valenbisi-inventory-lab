@@ -1,0 +1,7 @@
+valenbisi:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: dbt/target/valenbisi.duckdb
+      threads: 2
