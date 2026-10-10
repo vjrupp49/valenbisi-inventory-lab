@@ -62,3 +62,4 @@
   Token lives only as a Cloudflare secret. Once verified, consider removing the GitHub schedule so the feed is not hit twice.
 - 2026-10-10: Cloudflare timer verified (35 consecutive dispatch runs ~10 min apart, all success). Removed GitHub `schedule:` from ingest.yml to avoid double requests.
   If the timer ever stops (token expiry), the health workflow opens an issue; re-add a schedule or renew the token.
+- Timer token (GitHub fine-grained, Actions r/w, this repo only) expires 2027-03-01 per Vincent. Renew before then: new token -> replace Cloudflare secret GITHUB_TOKEN (Worker > Settings > Variables and Secrets).
