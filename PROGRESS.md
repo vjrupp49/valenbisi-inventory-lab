@@ -60,3 +60,5 @@
   fired in ~7 h. Verify over the next days with check_data.py; if still sparse, consider an external trigger (Cloudflare Worker calling workflow_dispatch).
 - 2026-10-09: GitHub cron still ~1 run per 7 h. Added `cloudflare/` Worker (10-min timer calling workflow_dispatch) per Vincent's go-ahead.
   Token lives only as a Cloudflare secret. Once verified, consider removing the GitHub schedule so the feed is not hit twice.
+- 2026-10-10: Cloudflare timer verified (35 consecutive dispatch runs ~10 min apart, all success). Removed GitHub `schedule:` from ingest.yml to avoid double requests.
+  If the timer ever stops (token expiry), the health workflow opens an issue; re-add a schedule or renew the token.

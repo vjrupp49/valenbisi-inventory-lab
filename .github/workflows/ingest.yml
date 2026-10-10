@@ -1,11 +1,9 @@
 name: ingest
 
-# Scheduled workflows only run from the default branch (main).
-# GitHub cron is best-effort: runs drift and occasionally skip. That is measured, not hidden
-# (see run_meta + src/check_data.py).
+# Triggered every 10 min by an external Cloudflare Worker (see cloudflare/), because GitHub's own
+# cron ran this repo only about once every 7 hours. There is deliberately no `schedule:` here, so the
+# feed is not requested twice. Gaps are still measured, not hidden (run_meta + src/check_data.py).
 on:
-  schedule:
-    - cron: "7,17,27,37,47,57 * * * *"  # every 10 min, off the busy :00/:10 marks GitHub tends to drop
   workflow_dispatch:
 
 permissions:
