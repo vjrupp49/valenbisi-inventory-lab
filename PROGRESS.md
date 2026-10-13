@@ -63,3 +63,5 @@
 - 2026-10-10: Cloudflare timer verified (35 consecutive dispatch runs ~10 min apart, all success). Removed GitHub `schedule:` from ingest.yml to avoid double requests.
   If the timer ever stops (token expiry), the health workflow opens an issue; re-add a schedule or renew the token.
 - Timer token (GitHub fine-grained, Actions r/w, this repo only) expires 2027-03-01 per Vincent. Renew before then: new token -> replace Cloudflare secret GITHUB_TOKEN (Worker > Settings > Variables and Secrets).
+- 2026-10-13: health.yml raised false alarms (Oct 11, 12): expression compared outputs as text ("144" < "24"). Fixed by computing
+  `unhealthy` numerically in the shell step. Collection itself verified healthy: 453 runs, 0 errors, no gap >11 min since Oct 10.

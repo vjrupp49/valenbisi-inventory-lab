@@ -33,9 +33,15 @@ jobs:
           echo "last=$last" >> "$GITHUB_OUTPUT"
           echo "n=$n" >> "$GITHUB_OUTPUT"
           echo "age_h=$age_h" >> "$GITHUB_OUTPUT"
+          # Compare as numbers here (workflow expressions compare outputs as text, e.g. "144" < "24").
+          if [ "$age_h" -gt "$MAX_AGE_HOURS" ] || [ "$n" -lt "$MIN_RUNS_24H" ]; then
+            echo "unhealthy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "unhealthy=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Open an issue if unhealthy
-        if: ${{ steps.m.outputs.age_h > env.MAX_AGE_HOURS || steps.m.outputs.n < env.MIN_RUNS_24H }}
+        if: ${{ steps.m.outputs.unhealthy == 'true' }}
         run: |
           title="Data collection looks unhealthy"
           existing=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "$title in:title" --json number -q '.[0].number')
