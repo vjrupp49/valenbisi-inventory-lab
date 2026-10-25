@@ -7,10 +7,16 @@ station is a stockout, and rebalancing trucks are replenishment. This project co
 feed continuously, models it in SQL (DuckDB + dbt), forecasts stockouts, and simulates which
 rebalancing policy would have prevented the most of them.
 
-> **Status: data collection started; modeling, forecasting and simulation scaffolds exist but are
-> developed and tested on synthetic data only.** No forecast score, segment or key result from real
-> data is reported here, because the collected history is still far too short (see
-> [docs/data_quality_findings.md](docs/data_quality_findings.md)).
+> **Status: collecting continuously; first descriptive results and a data-integrity audit are done.**
+> Forecasting, segmentation and simulation exist as tested scaffolds but have **no real-data results yet**
+> (about two weeks of data so far). Everything below comes from scripts in this repo on a frozen dataset.
+
+## First results (frozen dataset, 15 complete days; details and caveats in [docs/service_level_findings.md](docs/service_level_findings.md))
+- Stations are empty about 13% of the time and full about 7% of the time (stockout rate 13.4% headline, 12.9% to 13.9% depending on how stuck readings are treated; blockout 6.7%). Stockouts are lower bounds because stockouts shorter than the 10-minute sampling can be missed.
+- Strongly time-of-day dependent: on weekdays about 19% of stations are empty around 02:00 and about 11% mid-afternoon; about 16% are full at 03:00 and about 2% at 15:00.
+- Concentrated: 1 of 272 stations is empty at least half the time, 36 at least a quarter; 21 more stations are empty over half the time in specific hours.
+- Data caveat that changed the method: the feed's `last_reported` field barely moves when bike counts do, so data quality is judged by how long a count has been frozen instead ([docs/data_integrity_report.md](docs/data_integrity_report.md)).
+- Only two weekly cycles in one autumn month: no weather, holiday or seasonal conclusions.
 
 ## Why this project
 Inventory theory (ABC/XYZ segmentation, safety stock, service levels) transfers directly to
@@ -66,7 +72,9 @@ python src/check_data.py data_repo     # health report: gaps, errors, feed fresh
       (real scores withheld until >= 14 days; the CLI enforces this)
 - [x] Rebalancing Monte Carlo scaffold (all assumptions in `src/simulate/config.toml`)
 - [x] Dashboard skeleton (Shiny; needs R with shiny, ggplot2, dplyr)
-- [ ] Real forecasting results (needs 14+ days of data)
+- [x] Data integrity audit and frozen dataset ([report](docs/data_integrity_report.md))
+- [x] Descriptive service-level results ([findings](docs/service_level_findings.md))
+- [ ] Real forecasting results (scaffold ready; to be run against the frozen dataset next)
 - [ ] Simulation parameters estimated from real data
 - [ ] Weather and event effects (permutation tests, FDR correction)
 - [ ] Public dashboard
@@ -80,6 +88,11 @@ pytest -q
 # model the data (real data in data_repo/, or the SYNTHETIC sample)
 dbt build --project-dir dbt --profiles-dir dbt --vars '{data_root: dbt/sample_data}'
 dbt build --project-dir dbt --profiles-dir dbt                 # uses data_repo/
+
+# reproduce the audit and the descriptive results on the frozen dataset (see docs/dataset_card.md)
+python src/audit/run_audit.py --data data_frozen --out docs/data_integrity_results.md --dbt-db dbt/target/valenbisi.duckdb
+python src/analysis/service_level.py --db dbt/target/valenbisi.duckdb --out docs/service_level_results.md
+Rscript analysis/plot_service_level.R
 
 # synthetic-data development of the forecaster, and the simulation
 python src/forecast/run.py --db dbt/target/valenbisi.duckdb --synthetic

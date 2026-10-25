@@ -87,3 +87,9 @@
 - Real frozen data: dbt build PASS=46 WARN=1 (Oct 9 run gaps). Headline stockout rate 13.3% vs raw 13.9% vs strict 12.8%. Audit reconciles with dbt exactly.
 - Tests: 35 pass incl. 25-hour and 23-hour clock-change days, as-of capacity, stuck rule, holiday flag.
 - Note: flat_hours counts from first snapshot when no change seen yet, so the 12 h share is 1.1% in the model vs 0.7% in audit D8 (which skipped never-changed stretches).
+
+## 2026-10-25 Phase 4 done
+- src/analysis/service_level.py -> docs/service_level_results.md (auto); analysis/plot_service_level.R -> docs/figures/*.png; docs/service_level_findings.md (interpretation, numbers checked against results).
+- Headline: stockout 13.4% (12.0-13.9% across exclusion rules), blockout 6.7%; weekday overnight stockout ~19%, afternoon ~11%; 1 chronic station, 36 at >=25%.
+- README now has "First results" (every number from the scripts). tests/test_service_level.py added.
+- Next: Phase 5 segmentation stability, then Phase 6 forecast backtest on the frozen set.
