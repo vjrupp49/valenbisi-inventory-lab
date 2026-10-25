@@ -48,3 +48,8 @@ Source: `check_data.py` after `git -C data_repo pull`: 2 runs, 0 errors.
   Valencia (about 15:05 local). So the earlier "maybe overnight quiet" explanation is not supported by this
   data point; stale `last_reported` looks common in the daytime too. Two snapshots are still too few to
   conclude why, so the staleness handling in the models stays important.
+
+## Superseded (2026-10-25)
+The "stale" readings discussed above rested on `last_reported`. The full audit on 15 days of data
+([data_integrity_report.md](data_integrity_report.md), section C) found that `last_reported` barely moves when bike
+counts change, so it is not a reliable freshness signal. Read the earlier staleness comments in this file with that in mind.

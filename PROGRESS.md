@@ -70,3 +70,10 @@
 - ~15 full days collected (Oct 10-24), 2266 snapshots, 0 errors, only two gaps >15 min since the timer (30 min, 20 min).
 - Wrote docs/analysis_plan.md (phases 0-10). Step 1 = data integrity audit (docs/data_integrity_report.md, src/audit/).
   Stops for Vincent's review after the plan, after Phase 1, and after Phase 2.
+
+## 2026-10-25 Phases 0-1 done
+- Froze dataset: tag `data-freeze-2026-10-24` on the data branch (commit 0737447), local worktree `data_frozen/`, docs/dataset_card.md.
+- Audit: src/audit/run_audit.py (+ tests/test_audit.py), docs/data_integrity_results.md (generated), docs/data_integrity_report.md (interpretation).
+- Headline: collection solid (2168 snapshots, 0 failures, dbt matches raw); `last_reported` is NOT a freshness signal (count changes without it moving in 96.5% of cases);
+  stockouts 13.9% of snapshots, 33% of episodes one snapshot long; DST double hour on Oct 25 breaks the local-hour grain of fct_station_hour (to fix in Phase 3).
+- STOP: waiting for Vincent's review + 3 decisions (staleness replacement, forecast target, headline-stat exclusions) before Phase 2.

@@ -14,3 +14,5 @@ dbt/dbt_packages/
 logs/
 .scratch_synth/
 dashboard/data/
+data_frozen/
+reports/_cache/
