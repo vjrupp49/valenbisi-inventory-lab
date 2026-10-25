@@ -18,9 +18,9 @@ def _hourly(n_days=6, stations=("a", "b"), seed=0):
             t = pd.Timestamp("2030-01-07") + pd.Timedelta(hours=h)
             so = (s == "a") and t.hour in (8, 9)
             rows.append({
-                "station_id": s, "local_hour": t, "local_date": t.date(), "hour_of_day": t.hour,
+                "station_id": s, "hour_utc": t, "local_date": t.date(), "hour_of_day": t.hour,
                 "day_of_week": t.isoweekday(), "avg_availability": 0.0 if so else 0.5 + rng.normal(0, .02),
-                "min_bikes": 0 if so else 8, "stockout_share": float(so), "stale_share": 0.0,
+                "min_bikes": 0 if so else 8, "stockout_share": float(so), "stuck_share": 0.0,
                 "any_stockout": so,
             })
     return pd.DataFrame(rows)
@@ -37,9 +37,9 @@ def test_metrics_basic():
 
 def test_target_is_next_hour_stockout():
     ds = build_dataset(_hourly(), horizon_h=1)
-    row = ds[(ds["station_id"] == "a") & (ds["local_hour"] == pd.Timestamp("2030-01-08 07:00"))].iloc[0]
+    row = ds[(ds["station_id"] == "a") & (ds["hour_utc"] == pd.Timestamp("2030-01-08 07:00"))].iloc[0]
     assert row[TARGET] == 1  # the 08:00 hour is a stockout
-    row = ds[(ds["station_id"] == "a") & (ds["local_hour"] == pd.Timestamp("2030-01-08 10:00"))].iloc[0]
+    row = ds[(ds["station_id"] == "a") & (ds["hour_utc"] == pd.Timestamp("2030-01-08 10:00"))].iloc[0]
     assert row[TARGET] == 0
 
 
@@ -49,21 +49,21 @@ def test_no_feature_leakage_from_future():
     base = build_dataset(h)
     h2 = h.copy()
     t0 = pd.Timestamp("2030-01-09 12:00")
-    future = h2["local_hour"] > t0
+    future = h2["hour_utc"] > t0
     h2.loc[future, ["avg_availability", "stockout_share", "min_bikes"]] = [0.123, 1.0, 0]
     h2.loc[future, "any_stockout"] = True
     alt = build_dataset(h2)
-    k = ["station_id", "local_hour"]
-    a = base[base["local_hour"] <= t0].set_index(k)[FEATURES]
-    b = alt[alt["local_hour"] <= t0].set_index(k)[FEATURES]
+    k = ["station_id", "hour_utc"]
+    a = base[base["hour_utc"] <= t0].set_index(k)[FEATURES]
+    b = alt[alt["hour_utc"] <= t0].set_index(k)[FEATURES]
     pd.testing.assert_frame_equal(a.sort_index(), b.sort_index())
 
 
 def test_gap_gives_missing_lag_not_shifted_lag():
     h = _hourly()
-    gone = (h["station_id"] == "a") & (h["local_hour"] == pd.Timestamp("2030-01-08 05:00"))
+    gone = (h["station_id"] == "a") & (h["hour_utc"] == pd.Timestamp("2030-01-08 05:00"))
     ds = build_dataset(h[~gone])
-    row = ds[(ds["station_id"] == "a") & (ds["local_hour"] == pd.Timestamp("2030-01-08 06:00"))].iloc[0]
+    row = ds[(ds["station_id"] == "a") & (ds["hour_utc"] == pd.Timestamp("2030-01-08 06:00"))].iloc[0]
     assert np.isnan(row["avail_lag1"])
 
 
@@ -88,7 +88,7 @@ def test_rolling_origin_never_trains_on_test_day():
         name = "spy"
 
         def fit(self, train):
-            seen.append(train["local_hour"].max())
+            seen.append(train["hour_utc"].max())
             return self
 
     preds = rolling_origin(ds, horizon_h=1, min_train_days=2, models=[Spy()])

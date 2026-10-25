@@ -8,8 +8,12 @@ Status: describes what the code does today. Where something is a plan, it says s
   actual cadence is measured, see `fct_run_health`).
 - No trip data. Activity is inferred from changes in bike counts between consecutive snapshots, and only
   when the snapshots are at most 30 minutes apart. It is a lower bound on true trips.
-- `last_reported` can be much older than the feed timestamp. A snapshot is flagged stale when the station
-  last reported more than 1 hour earlier. A stale count is not evidence of "no demand".
+- `last_reported` is NOT a freshness signal: on the first 15 days it barely moved when bike counts did
+  (see `docs/data_integrity_report.md`, section C), so it is kept only as an information column.
+  Data quality is judged by whether a station's bike count has been unchanged for a long time: flagged at 6 h
+  (`is_stuck`), excluded from headline stockout/blockout rates at 12 h (`is_stuck_excluded`). Decisions and reasons:
+  `docs/analysis_charter.md`.
+- Short stockouts (shorter than the 10-minute snapshot spacing) can be missed, so stockout rates are lower bounds.
 - Findings from the real data so far: `docs/data_quality_findings.md`.
 
 ## 2. Modeling layer (dbt + DuckDB, `dbt/`)
@@ -17,14 +21,16 @@ Status: describes what the code does today. Where something is a plan, it says s
 |---|---|---|
 | `stg_*` | as source | rename/cast only |
 | `dim_station` | station | latest name, location, capacity; installed flag at the latest snapshot |
-| `fct_station_snapshot` | station x snapshot | local time, staleness, stockout/blockout, activity |
-| `fct_station_hour` | station x local hour | hourly roll-up used as forecasting features |
-| `fct_run_health` | collector run | gaps between runs, feed age, stale share |
-| `kpi_service_level` | station x hour-of-day | stockout/blockout rates (all vs fresh snapshots) with coverage columns |
+| `fct_station_snapshot` | station x snapshot | local time, stuck flags, stockout/blockout (raw and eligible), activity, as-of capacity, holiday flag |
+| `fct_station_hour` | station x UTC hour | hourly roll-up used as forecasting features (UTC so clock changes cannot merge or invent hours) |
+| `fct_run_health` | collector run | gaps between runs, feed age (the collector's `n_stale_1h` is informational only) |
+| `kpi_service_level` | station x hour-of-day | stockout/blockout rates (headline, strict, raw) with coverage columns |
 | `seg_station_abc_xyz` | station | ABC/XYZ segmentation |
 
 Definitions: stockout = installed, renting, 0 bikes. Blockout = installed, returning, 0 docks.
-Non-installed stations are excluded from service-level metrics. Thresholds live in `dbt/dbt_project.yml`.
+Non-installed stations and not-renting spells are excluded from service-level metrics. Headline rates also drop rows
+whose count has been flat for 12 h or more. Flat time is counted from the station's last observed change, or from
+the first snapshot if none has been seen, so it is a lower bound at the start of the data. Thresholds live in `dbt/dbt_project.yml`.
 
 ## 3. Segmentation
 - ABC: stations ranked by mean daily inferred activity; A = first 80 % of cumulative activity, B = next 15 %, C = rest.
@@ -50,5 +56,5 @@ Non-installed stations are excluded from service-level metrics. Thresholds live 
 
 ## 6. Not done yet / open questions
 - Weather and event effects (needs weeks of data).
-- Whether staleness at night is real inactivity or feed lag (needs daytime history).
+- Whether `last_reported` really refreshes in a daily batch (hypothesis from the audit, not proven).
 - Plugging the fitted forecaster into the simulator instead of a noise knob.

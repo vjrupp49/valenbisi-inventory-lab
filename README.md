@@ -52,9 +52,9 @@ python src/check_data.py data_repo     # health report: gaps, errors, feed fresh
 - **Live feed only.** There is no public history, so analysis starts from the first snapshot.
 - **No trip data.** Activity is inferred from changes in bike counts, which understates true trips
   (a bike out and a bike back between snapshots is invisible).
-- **`last_reported` can be old.** Many stations show last-reported times hours behind the feed
-  timestamp, so a station's count may be stale rather than unchanged. `run_meta.n_stale_1h`
-  tracks this and the modeling layer must handle it.
+- **`last_reported` is not a freshness signal.** Many stations show last-reported times hours behind the feed
+  timestamp, yet their bike counts keep changing (see [docs/data_integrity_report.md](docs/data_integrity_report.md)).
+  Data quality is therefore judged by how long a station's count has been unchanged instead.
 - **GitHub cron is best-effort.** Runs drift and can be skipped. Gaps are measured in `run_meta`.
 
 ## Roadmap

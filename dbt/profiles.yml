@@ -5,3 +5,5 @@ valenbisi:
       type: duckdb
       path: dbt/target/valenbisi.duckdb
       threads: 2
+      settings:
+        TimeZone: UTC   # hourly tables are keyed on UTC hours; Madrid time is derived explicitly

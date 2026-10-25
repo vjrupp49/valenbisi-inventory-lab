@@ -30,7 +30,7 @@ Refresh with: `git -C data_repo pull` (clone with `git clone --branch data --sin
 
 ## Known data caveats (model around these)
 - The feed is live-only; history starts at the first snapshot.
-- `last_reported` can be hours older than the feed timestamp, so a station count may be stale, not unchanged.
+- `last_reported` can be hours older than the feed timestamp but is NOT a reliable freshness signal (counts change without it moving; see docs/data_integrity_report.md). Use "count unchanged for N hours" (`is_stuck`, `is_stuck_excluded`) instead.
 - No trip data; activity is inferred from changes in bike counts (a lower bound on true trips).
 - Some stations are `is_installed = false`; exclude from service-level metrics.
 - GitHub cron drifts and skips; use run_meta to measure gaps instead of assuming a regular grid.

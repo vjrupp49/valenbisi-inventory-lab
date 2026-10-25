@@ -5,6 +5,7 @@ profile: valenbisi
 
 model-paths: ["models"]
 test-paths: ["tests"]
+seed-paths: ["seeds"]
 macro-paths: ["macros"]
 
 vars:
@@ -12,8 +13,10 @@ vars:
   # with --project-dir dbt, or from dbt/ itself; paths below resolve against the current directory).
   # Real data: data_repo     CI / demo (SYNTHETIC): dbt/sample_data
   data_root: data_repo
-  # A snapshot is "stale" when the station last reported more than this long before the snapshot.
-  stale_after_hours: 1
+  # Data-quality rule (decided 2026-10-25, see docs/analysis_charter.md): a station-snapshot is "stuck" when its bike
+  # count has not changed for this many hours. `last_reported` is NOT used: it barely moves when counts do.
+  stuck_flag_hours: 6        # flagged (is_stuck); used for the strict sensitivity version of the rates
+  stuck_exclude_hours: 12    # excluded from headline stockout/blockout rates (is_stuck_excluded)
   # Activity (abs change in bike count) is only counted between snapshots at most this far apart.
   max_delta_gap_minutes: 30
   # Segmentation / KPI results are marked provisional until this many distinct days exist.
@@ -29,6 +32,11 @@ vars:
   # Run-health checks
   max_run_gap_hours: 3
   check_recency: false
+
+seeds:
+  valenbisi:
+    holidays:
+      +column_types: {holiday_date: date}
 
 models:
   valenbisi:

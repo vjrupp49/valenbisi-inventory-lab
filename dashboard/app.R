@@ -34,12 +34,14 @@ ui <- fluidPage(
              sidebarLayout(
                sidebarPanel(
                  selectInput("measure", "Measure",
-                             c("Stockout rate (fresh snapshots)" = "stockout_rate_fresh",
-                               "Stockout rate (all snapshots)" = "stockout_rate_all",
-                               "Blockout rate (fresh snapshots)" = "blockout_rate_fresh",
-                               "Blockout rate (all snapshots)" = "blockout_rate_all")),
-                 numericInput("min_fresh", "Min. fresh snapshots per cell", 1, min = 0),
-                 helpText("Fresh = station reported within the last hour. Cells with too little data are blank.")
+                             c("Stockout rate (headline)" = "stockout_rate",
+                               "Stockout rate (strict: excludes counts flat 6 h+)" = "stockout_rate_strict",
+                               "Stockout rate (raw)" = "stockout_rate_raw",
+                               "Blockout rate (headline)" = "blockout_rate",
+                               "Blockout rate (strict)" = "blockout_rate_strict",
+                               "Blockout rate (raw)" = "blockout_rate_raw")),
+                 numericInput("min_rows", "Min. eligible snapshots per cell", 1, min = 0),
+                 helpText("Headline = installed and renting (or returning) stations, minus readings whose bike count has not changed for 12 h or more. Stockouts shorter than the 10-minute snapshot spacing can be missed, so rates are lower bounds. Cells with too little data are blank.")
                ),
                mainPanel(plotOutput("heatmap", height = "600px"))
              )),
@@ -60,8 +62,9 @@ server <- function(input, output, session) {
 
   output$heatmap <- renderPlot({
     req(kpi)
-    d <- kpi %>% filter(n_fresh_snapshots >= input$min_fresh | grepl("_all$", input$measure))
-    ggplot(d, aes(x = hour_of_day, y = reorder(factor(station_id), n_snapshots), fill = .data[[input$measure]])) +
+    elig <- if (grepl("^blockout", input$measure)) "n_blockout_eligible" else "n_stockout_eligible"
+    d <- kpi %>% filter(.data[[elig]] >= input$min_rows)
+    ggplot(d, aes(x = hour_of_day, y = reorder(factor(station_id), n_installed_rows), fill = .data[[input$measure]])) +
       geom_tile() +
       scale_fill_viridis_c(na.value = "grey90", labels = scales::percent) +
       labs(x = "Hour of day (Valencia time)", y = "Station", fill = NULL) +

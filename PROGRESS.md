@@ -78,3 +78,12 @@
   stockouts 13.9% of snapshots, 33% of episodes one snapshot long; DST double hour on Oct 25 breaks the local-hour grain of fct_station_hour (to fix in Phase 3).
 - STOP: waiting for Vincent's review + 3 decisions (staleness replacement, forecast target, headline-stat exclusions) before Phase 2.
 - CI broke on the new DuckDB 2.0 (Relation.fetchone() removed); tests switched to con.execute(...).fetchone(). Lesson: requirements are unpinned, so CI picks up new majors; keep an eye on CI emails.
+
+## 2026-10-25 Phases 2-3 done
+- Phase 2: docs/analysis_charter.md. Decisions (made by Claude on Vincent's instruction): replace last_reported staleness with "count flat N h"
+  (flag 6 h, exclude 12 h), hourly "any stockout" forecast target, headline rates exclude not-installed / not-renting / stuck>=12 h.
+- Phase 3: dbt rebuilt. fct_station_snapshot (flat_hours, is_stuck, is_stuck_excluded, *_eligible, as-of capacity, is_holiday), fct_station_hour on UTC hour,
+  kpi_service_level (headline / strict / raw rates + exclusion counts), holidays seed, 4 new data tests, forecast code moved to hour_utc/stuck_share, dashboard updated.
+- Real frozen data: dbt build PASS=46 WARN=1 (Oct 9 run gaps). Headline stockout rate 13.3% vs raw 13.9% vs strict 12.8%. Audit reconciles with dbt exactly.
+- Tests: 35 pass incl. 25-hour and 23-hour clock-change days, as-of capacity, stuck rule, holiday flag.
+- Note: flat_hours counts from first snapshot when no change seen yet, so the 12 h share is 1.1% in the model vs 0.7% in audit D8 (which skipped never-changed stretches).

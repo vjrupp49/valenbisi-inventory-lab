@@ -32,9 +32,15 @@ models:
       - name: day_of_week
         tests:
           - accepted_values: {arguments: {values: [1,2,3,4,5,6,7], quote: false}}
-      - name: is_stale
+      - name: flat_hours
+        tests: [not_null]
+      - name: is_stuck
+        tests: [not_null]
+      - name: is_stuck_excluded
         tests: [not_null]
       - name: is_stockout
+        tests: [not_null]
+      - name: is_stockout_eligible
         tests: [not_null]
   - name: fct_station_hour
     columns:

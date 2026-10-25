@@ -5,6 +5,7 @@ select
     error,
     feed_age_s,
     n_installed,
+    -- n_stale_1h comes from the collector and is based on last_reported: informational only, not a quality gate
     n_stale_1h,
     n_stale_1h * 1.0 / nullif(n_installed, 0) as stale_share,
     date_diff('second', lag(snapshot_ts) over (order by snapshot_ts), snapshot_ts) / 60.0 as gap_minutes

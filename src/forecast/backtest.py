@@ -15,21 +15,21 @@ from .models import all_models
 
 def rolling_origin(ds: pd.DataFrame, horizon_h: int = 1, min_train_days: int = 2, seed: int = 0,
                    models=None) -> pd.DataFrame:
-    """Return one row per (test row, model): station_id, local_hour, y, model, p, fold_date."""
+    """Return one row per (test row, model): station_id, hour_utc, y, model, p, fold_date."""
     days = sorted(ds["date"].unique())
     preds = []
     for d in days[min_train_days:]:
         day_start = pd.Timestamp(d)
         day_end = day_start + pd.Timedelta(days=1)
         # label for origin t lives at t + horizon, so require t + horizon < day_start
-        train = ds[ds["local_hour"] + pd.Timedelta(hours=horizon_h) < day_start]
-        test = ds[(ds["local_hour"] >= day_start) & (ds["local_hour"] < day_end)]
+        train = ds[ds["hour_utc"] + pd.Timedelta(hours=horizon_h) < day_start]
+        test = ds[(ds["hour_utc"] >= day_start) & (ds["hour_utc"] < day_end)]
         if train.empty or test.empty:
             continue
         for m in (models or all_models(seed)):
             m.fit(train)  # fit() resets all state, so reusing the instance across folds is safe
             p = m.predict_proba(test)
-            out = test[["station_id", "local_hour", TARGET]].copy()
+            out = test[["station_id", "hour_utc", TARGET]].copy()
             out["model"] = m.name
             out["p"] = p
             out["fold_date"] = day_start
@@ -41,10 +41,10 @@ def summarize(preds: pd.DataFrame, ref_model: str = "hour_of_week") -> pd.DataFr
     """Per-model Brier, skill vs `ref_model`, calibration error, base rate and n."""
     if preds.empty:
         return pd.DataFrame()
-    ref = preds[preds["model"] == ref_model].set_index(["station_id", "local_hour"])["p"]
+    ref = preds[preds["model"] == ref_model].set_index(["station_id", "hour_utc"])["p"]
     rows = []
     for name, g in preds.groupby("model"):
-        g = g.set_index(["station_id", "local_hour"])
+        g = g.set_index(["station_id", "hour_utc"])
         p_ref = ref.reindex(g.index).to_numpy()
         rows.append({
             "model": name, "n": len(g), "base_rate": g[TARGET].mean(),
