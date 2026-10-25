@@ -115,14 +115,14 @@ CHECKS: list[tuple[str, str, str, str]] = [
      "SELECT station_id, count(*) FILTER (WHERE NOT inst) AS rows_not_installed, count(*) AS rows_total, "
      "min(t) FILTER (WHERE NOT inst) AS first_not_installed, max(t) FILTER (WHERE NOT inst) AS last_not_installed, "
      "max(b) FILTER (WHERE NOT inst) AS max_bikes_while_not_installed FROM pairs GROUP BY 1 HAVING count(*) FILTER (WHERE NOT inst) > 0 "
-     "ORDER BY 2 DESC"),
+     "ORDER BY 2 DESC, 1"),
     ("B. Validity", "B6", "Installed but NOT renting (bikes cannot be taken): summary and top stations",
      "SELECT count(DISTINCT station_id) AS stations, count(*) AS station_snapshots, "
      "round(avg((b <> pb)::int) FILTER (WHERE pb IS NOT NULL), 4) AS bike_change_rate_while_not_renting "
      "FROM pairs WHERE inst AND NOT rent"),
     ("B. Validity", "B6b", "Installed but not renting: longest-affected stations",
      "SELECT station_id, count(*) AS snapshots, min(t) AS first_t, max(t) AS last_t, round(avg(b), 1) AS mean_bikes, "
-     "round(avg((b = 0)::int), 2) AS share_zero_bikes FROM pairs WHERE inst AND NOT rent GROUP BY 1 ORDER BY 2 DESC LIMIT 8"),
+     "round(avg((b = 0)::int), 2) AS share_zero_bikes FROM pairs WHERE inst AND NOT rent GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 8"),
     ("B. Validity", "B7", "Stations first seen after the first snapshot",
      "SELECT station_id, min(t) AS first_seen, count(*) AS snapshots FROM pairs GROUP BY 1 "
      "HAVING min(t) > (SELECT min(snapshot_ts) FROM st) + INTERVAL 1 HOUR"),
@@ -176,7 +176,7 @@ CHECKS: list[tuple[str, str, str, str]] = [
      "WITH x AS (SELECT station_id, t, b, (b <> lag(b) OVER (PARTITION BY station_id ORDER BY t))::int AS chg FROM pairs WHERE inst), "
      "y AS (SELECT *, sum(coalesce(chg, 0)) OVER (PARTITION BY station_id ORDER BY t) AS grp FROM x), "
      "z AS (SELECT station_id, grp, any_value(b) AS bikes, epoch(max(t) - min(t))/3600.0 AS hours FROM y GROUP BY 1, 2) "
-     "SELECT station_id, round(max(hours), 1) AS longest_flat_hours, arg_max(bikes, hours) AS bikes_during FROM z GROUP BY 1 ORDER BY 2 DESC LIMIT 8"),
+     "SELECT station_id, round(max(hours), 1) AS longest_flat_hours, arg_max(bikes, hours) AS bikes_during FROM z GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 8"),
     ("D. Signal and resolution", "D8", "Share of installed-and-renting station-snapshots whose count has not changed for at least N hours",
      "WITH x AS (SELECT station_id, t, inst, rent, (b <> lag(b) OVER (PARTITION BY station_id ORDER BY t)) AS chg FROM pairs), "
      "y AS (SELECT *, max(CASE WHEN chg THEN t END) OVER (PARTITION BY station_id ORDER BY t ROWS UNBOUNDED PRECEDING) AS last_change FROM x), "

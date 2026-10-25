@@ -77,3 +77,4 @@
 - Headline: collection solid (2168 snapshots, 0 failures, dbt matches raw); `last_reported` is NOT a freshness signal (count changes without it moving in 96.5% of cases);
   stockouts 13.9% of snapshots, 33% of episodes one snapshot long; DST double hour on Oct 25 breaks the local-hour grain of fct_station_hour (to fix in Phase 3).
 - STOP: waiting for Vincent's review + 3 decisions (staleness replacement, forecast target, headline-stat exclusions) before Phase 2.
+- CI broke on the new DuckDB 2.0 (Relation.fetchone() removed); tests switched to con.execute(...).fetchone(). Lesson: requirements are unpinned, so CI picks up new majors; keep an eye on CI emails.
