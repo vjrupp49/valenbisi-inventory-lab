@@ -65,3 +65,8 @@
 - Timer token (GitHub fine-grained, Actions r/w, this repo only) expires 2027-03-01 per Vincent. Renew before then: new token -> replace Cloudflare secret GITHUB_TOKEN (Worker > Settings > Variables and Secrets).
 - 2026-10-13: health.yml raised false alarms (Oct 11, 12): expression compared outputs as text ("144" < "24"). Fixed by computing
   `unhealthy` numerically in the shell step. Collection itself verified healthy: 453 runs, 0 errors, no gap >11 min since Oct 10.
+
+## 2026-10-25 real-data phase plan
+- ~15 full days collected (Oct 10-24), 2266 snapshots, 0 errors, only two gaps >15 min since the timer (30 min, 20 min).
+- Wrote docs/analysis_plan.md (phases 0-10). Step 1 = data integrity audit (docs/data_integrity_report.md, src/audit/).
+  Stops for Vincent's review after the plan, after Phase 1, and after Phase 2.

@@ -46,7 +46,10 @@ actually does, change committed with a clear message, entry added to PROGRESS.md
   skip that item, and continue with the next one.
 - Vincent knows R and Quarto well, Python and SQL less; comment non-obvious SQL and keep structure simple.
 
-## Roadmap (do in order; tick off in PROGRESS.md)
+## Real-data phase
+See docs/analysis_plan.md (written 2026-10-25). Do the data integrity audit first; stop for review at the gates it lists.
+
+## Original roadmap (scaffolding phase, done; tick off in PROGRESS.md)
 1. Environment: venv, `pip install -r requirements.txt dbt-duckdb`; verify pytest green.
 2. Pull `data_repo`; run `python src/check_data.py data_repo`; record findings (gap sizes, feed freshness,
    share of stale stations) in `docs/data_quality_findings.md` using ONLY what the output shows.
