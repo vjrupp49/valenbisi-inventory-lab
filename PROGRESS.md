@@ -93,3 +93,10 @@
 - Headline: stockout 13.4% (12.0-13.9% across exclusion rules), blockout 6.7%; weekday overnight stockout ~19%, afternoon ~11%; 1 chronic station, 36 at >=25%.
 - README now has "First results" (every number from the scripts). tests/test_service_level.py added.
 - Next: Phase 5 segmentation stability, then Phase 6 forecast backtest on the frozen set.
+
+## 2026-11-04 Phases 5-6 done
+- Collection health: 3,736 runs; 4 failures = upstream HTTP 503 on api.cyclocity.fr 2026-11-02 23:30-00:00 UTC (not our bug; logged in run_meta); gaps since Oct 10 max 30 min.
+- Phase 5: src/analysis/segmentation_stability.py -> docs/segmentation_results.md / segmentation_findings.md. Ranking stable (Spearman 0.98-0.99), A/B/C labels 90-93% agreement, 11-15% move with cutoffs, XYZ barely discriminates (253/273 are X) -> use rank, not labels; revisit XYZ with relative thresholds at 30+ days.
+- Phase 6: src/forecast/evaluate.py (+ StationMean/StationState baselines, AUC/log-loss, day-block bootstrap, placebo). Real results on frozen data: 1 h GBM Brier 0.083 vs 0.099 best baseline (skill 16.5%, CI 15.2-18.3%), AUC 0.93; 3 h skill 8.2%; 6 h no better than hour-of-week. Placebo AUC 0.51.
+- Caveats recorded: only 9 test days, intervals probably too narrow; model mostly uses min_bikes this hour (short-term tracking, not weekly routine).
+- Next: connect measured forecast skill to the simulation's forecast-noise knob; new freeze + re-run at ~30 days (around Nov 24).

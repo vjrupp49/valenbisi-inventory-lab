@@ -8,14 +8,16 @@ feed continuously, models it in SQL (DuckDB + dbt), forecasts stockouts, and sim
 rebalancing policy would have prevented the most of them.
 
 > **Status: collecting continuously; first descriptive results and a data-integrity audit are done.**
-> Forecasting, segmentation and simulation exist as tested scaffolds but have **no real-data results yet**
-> (about two weeks of data so far). Everything below comes from scripts in this repo on a frozen dataset.
+> Segmentation and a 1-hour-ahead stockout forecast now have first real results, with stated limits; the rebalancing
+> simulation is still assumption-driven. Everything below comes from scripts in this repo on a frozen two-week dataset.
 
 ## First results (frozen dataset, 15 complete days; details and caveats in [docs/service_level_findings.md](docs/service_level_findings.md))
 - Stations are empty about 13% of the time and full about 7% of the time (stockout rate 13.4% headline, 12.9% to 13.9% depending on how stuck readings are treated; blockout 6.7%). Stockouts are lower bounds because stockouts shorter than the 10-minute sampling can be missed.
 - Strongly time-of-day dependent: on weekdays about 19% of stations are empty around 02:00 and about 11% mid-afternoon; about 16% are full at 03:00 and about 2% at 15:00.
 - Concentrated: 1 of 272 stations is empty at least half the time, 36 at least a quarter; 21 more stations are empty over half the time in specific hours.
 - Data caveat that changed the method: the feed's `last_reported` field barely moves when bike counts do, so data quality is judged by how long a count has been frozen instead ([docs/data_integrity_report.md](docs/data_integrity_report.md)).
+- Segments are stable in rank but not in labels: station activity ranks agree at 0.98 to 0.99 (Spearman) between halves of the period; A/B/C labels agree for 90% to 93% of stations and move for 11% to 15% when the cut-offs shift; the textbook XYZ steadiness split barely separates these stations ([docs/segmentation_findings.md](docs/segmentation_findings.md)).
+- Forecast (any stockout in the next hour, 9 test days): a gradient-boosted model scores a Brier of 0.083 versus 0.099 for the best simple baseline (16.5% better, 95% interval 15.2% to 18.3%) and AUC 0.93; a placebo check collapses to chance. The edge shrinks with lead time: 8% better at 3 hours, and no better than a weekly-pattern average at 6 hours ([docs/forecast_findings.md](docs/forecast_findings.md)).
 - Only two weekly cycles in one autumn month: no weather, holiday or seasonal conclusions.
 
 ## Why this project
@@ -74,7 +76,8 @@ python src/check_data.py data_repo     # health report: gaps, errors, feed fresh
 - [x] Dashboard skeleton (Shiny; needs R with shiny, ggplot2, dplyr)
 - [x] Data integrity audit and frozen dataset ([report](docs/data_integrity_report.md))
 - [x] Descriptive service-level results ([findings](docs/service_level_findings.md))
-- [ ] Real forecasting results (scaffold ready; to be run against the frozen dataset next)
+- [x] Segmentation stability ([findings](docs/segmentation_findings.md))
+- [x] Real forecasting results, first version ([findings](docs/forecast_findings.md))
 - [ ] Simulation parameters estimated from real data
 - [ ] Weather and event effects (permutation tests, FDR correction)
 - [ ] Public dashboard
@@ -93,6 +96,10 @@ dbt build --project-dir dbt --profiles-dir dbt                 # uses data_repo/
 python src/audit/run_audit.py --data data_frozen --out docs/data_integrity_results.md --dbt-db dbt/target/valenbisi.duckdb
 python src/analysis/service_level.py --db dbt/target/valenbisi.duckdb --out docs/service_level_results.md
 Rscript analysis/plot_service_level.R
+
+# forecast and segmentation results on the frozen dataset
+python src/forecast/evaluate.py --db dbt/target/valenbisi.duckdb --out docs/forecast_results.md
+python src/analysis/segmentation_stability.py --db dbt/target/valenbisi.duckdb --out docs/segmentation_results.md
 
 # synthetic-data development of the forecaster, and the simulation
 python src/forecast/run.py --db dbt/target/valenbisi.duckdb --synthetic

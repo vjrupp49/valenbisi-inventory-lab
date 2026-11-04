@@ -28,3 +28,16 @@ def calibration_table(y_true, p, n_bins: int = 10) -> pd.DataFrame:
 def expected_calibration_error(y_true, p, n_bins: int = 10) -> float:
     t = calibration_table(y_true, p, n_bins)
     return float((t["n"] * t["abs_gap"]).sum() / t["n"].sum())
+
+
+def auc(y_true, p) -> float:
+    """Area under the ROC curve (ranking quality, ignores calibration). NaN if only one class is present."""
+    from sklearn.metrics import roc_auc_score
+
+    y = np.asarray(y_true)
+    return float("nan") if len(np.unique(y)) < 2 else float(roc_auc_score(y, p))
+
+
+def log_loss(y_true, p) -> float:
+    y, p = np.asarray(y_true, float), np.clip(np.asarray(p, float), 1e-6, 1 - 1e-6)
+    return float(-np.mean(y * np.log(p) + (1 - y) * np.log(1 - p)))

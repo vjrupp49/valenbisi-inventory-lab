@@ -39,13 +39,14 @@ the first snapshot if none has been seen, so it is a lower bound at the start of
 - The cutoffs are conventional defaults, not tuned to this system.
 
 ## 4. Forecasting (`src/forecast/`)
-- Target: stockout at the same station in the hour `t + h` (default h = 1).
+- Target: any eligible stockout at the same station in the UTC hour `t + h` (default h = 1).
 - Features use only hour `t` and earlier (tested for leakage). A missing hour yields a missing lag, never a shifted one.
-- Models: persistence, station x hour-of-week mean (with shrinkage), gradient-boosted trees.
+- Models: persistence, station average, station-state (stockout-now conditional rate), station x hour-of-week mean (with shrinkage), gradient-boosted trees.
 - Evaluation: expanding-window rolling-origin backtest, one test day per fold, training labels must end before the
   test day; scored with Brier score, Brier skill against the hour-of-week baseline, and a calibration table.
-- Guard: `src/forecast/run.py` refuses to print scores on real data until 14 distinct days exist.
-- All development so far used synthetic data (`src/synth.py`); synthetic scores say nothing about real performance.
+- Guard: `src/forecast/run.py` and `src/forecast/evaluate.py` refuse to print scores on real data until 14 distinct days exist.
+- Real evaluation: `src/forecast/evaluate.py` adds day-block bootstrap intervals, a placebo check and horizons of 1, 3 and 6 hours;
+  results in `docs/forecast_findings.md`. Synthetic data (`src/synth.py`) is used only for development and tests.
 
 ## 5. Simulation (`src/simulate/`)
 - Monte Carlo of pickups/returns per station-hour, with lost demand when empty/full, and four policies

@@ -64,6 +64,58 @@ class HourOfWeek:
         return np.clip(np.array(out, dtype=float), EPS, 1 - EPS)
 
 
+class StationMean:
+    """Each station's own base rate of the target in the training window (shrunk toward the global rate)."""
+
+    name = "station_mean"
+
+    def __init__(self, k: float = 3.0):
+        self.k = k
+
+    def fit(self, train: pd.DataFrame):
+        self.global_ = float(train[TARGET].mean())
+        st = train.groupby("station_id")[TARGET].agg(["sum", "count"])
+        self.station_ = ((st["sum"] + self.k * self.global_) / (st["count"] + self.k)).to_dict()
+        return self
+
+    def predict_proba(self, test: pd.DataFrame) -> np.ndarray:
+        p = np.array([self.station_.get(s, self.global_) for s in test["station_id"]], dtype=float)
+        return np.clip(p, EPS, 1 - EPS)
+
+
+class StationState:
+    """A calibrated version of persistence: P(stockout next hour | stockout now?), learned per station.
+
+    Uses the station's own training frequencies for the two states (stockout this hour / not), shrunk toward the
+    global frequency for that state. This is the strongest simple baseline for "does the current state carry over".
+    """
+
+    name = "station_state"
+
+    def __init__(self, k: float = 5.0):
+        self.k = k
+
+    @staticmethod
+    def _state(df: pd.DataFrame) -> np.ndarray:
+        return (df["stockout_share"].fillna(0.0).to_numpy() > 0).astype(int)
+
+    def fit(self, train: pd.DataFrame):
+        t = train[["station_id", TARGET]].copy()
+        t["state"] = self._state(train)
+        self.global_ = {s: float(g[TARGET].mean()) if len(g) else float(train[TARGET].mean()) for s, g in t.groupby("state")}
+        self.table_ = {}
+        for (sid, s), g in t.groupby(["station_id", "state"]):
+            prior = self.global_[s]
+            self.table_[(sid, s)] = (g[TARGET].sum() + self.k * prior) / (len(g) + self.k)
+        self.default_ = float(train[TARGET].mean())
+        return self
+
+    def predict_proba(self, test: pd.DataFrame) -> np.ndarray:
+        st = self._state(test)
+        p = [self.table_.get((sid, s), self.global_.get(s, self.default_)) for sid, s in zip(test["station_id"], st)]
+        return np.clip(np.array(p, dtype=float), EPS, 1 - EPS)
+
+
 class GradientBoosting:
     """Gradient-boosted trees (sklearn HistGradientBoostingClassifier) on the lagged features."""
 
@@ -90,7 +142,7 @@ class GradientBoosting:
 
 
 def all_models(seed: int = 0):
-    return [Persistence(), HourOfWeek(), GradientBoosting(seed=seed)]
+    return [Persistence(), StationMean(), StationState(), HourOfWeek(), GradientBoosting(seed=seed)]
 
 
-__all__ = ["Persistence", "HourOfWeek", "GradientBoosting", "all_models", "FEATURES"]
+__all__ = ["Persistence", "StationMean", "StationState", "HourOfWeek", "GradientBoosting", "all_models", "FEATURES"]
