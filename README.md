@@ -2,121 +2,57 @@
 
 ![ingest](https://github.com/vjrupp49/valenbisi-inventory-lab/actions/workflows/ingest.yml/badge.svg) ![ci](https://github.com/vjrupp49/valenbisi-inventory-lab/actions/workflows/ci.yml/badge.svg)
 
-Treating Valencia's bike-share stations as **inventory nodes**: bikes are stock, an empty or full
-station is a stockout, and rebalancing trucks are replenishment. This project collects the live
-feed continuously, models it in SQL (DuckDB + dbt), forecasts stockouts, and simulates which
-rebalancing policy would have prevented the most of them.
+**What if a city's bike stations were treated like warehouse inventory?** Bikes are stock, an empty station is a stockout, a full station is a blockout, and the trucks that move bikes are replenishment. This project collects Valencia's live bike-share feed every 10 minutes, models it in SQL (DuckDB + dbt), measures service level, forecasts stockouts, and simulates whether forecasting would improve rebalancing.
 
-> **Status: collecting continuously; first descriptive results and a data-integrity audit are done.**
-> Segmentation, a 1-hour-ahead stockout forecast and a data-based rebalancing simulation now have first results, with stated
-> limits (the simulation is assumption-bound). Everything below comes from scripts in this repo on a frozen two-week dataset.
+**New here? Read the [one-page case study](docs/case_study.md)** (5 minutes). Everything below is produced by scripts in this repo from real collected data.
 
-**New here? Start with the [one-page case study](docs/case_study.md).**
+## The results in 30 seconds
+| Question | Answer |
+|---|---|
+| How bad is service? | Stations are **empty about 13% of the time** and full about 7%, with a strong daily pattern. 36 of 272 stations are empty at least a quarter of the time. |
+| Can empty stations be forecast? | **Yes, one hour ahead:** AUC 0.93, and 16.5% better Brier score than the best simple baseline (95% interval 15.2% to 18.3%). The edge fades by 3 to 6 hours. |
+| Would forecasts improve rebalancing? | **Only a little.** In a simulation, planning with a 3-hour forecast beats simply reacting to current counts by about 21 lost pickups a day (95% interval 14 to 28), under 1%. **The number of trucks matters far more than forecast quality.** |
+| What was surprising about the data? | The feed's `last_reported` timestamp looks like a freshness flag but is not: it changed in only 3.5% of the intervals where bike counts changed. Using it would have discarded 94% of readings, so freshness is judged by how long a count has been frozen. |
 
-## First results (frozen dataset, 15 complete days; details and caveats in [docs/service_level_findings.md](docs/service_level_findings.md))
-- Stations are empty about 13% of the time and full about 7% of the time (stockout rate 13.4% headline, 12.9% to 13.9% depending on how stuck readings are treated; blockout 6.7%). Stockouts are lower bounds because stockouts shorter than the 10-minute sampling can be missed.
-- Strongly time-of-day dependent: on weekdays about 19% of stations are empty around 02:00 and about 11% mid-afternoon; about 16% are full at 03:00 and about 2% at 15:00.
-- Concentrated: 1 of 272 stations is empty at least half the time, 36 at least a quarter; 21 more stations are empty over half the time in specific hours.
-- Data caveat that changed the method: the feed's `last_reported` field barely moves when bike counts do, so data quality is judged by how long a count has been frozen instead ([docs/data_integrity_report.md](docs/data_integrity_report.md)).
-- Segments are stable in rank but not in labels: station activity ranks agree at 0.98 to 0.99 (Spearman) between halves of the period; A/B/C labels agree for 90% to 93% of stations and move for 11% to 15% when the cut-offs shift; the textbook XYZ steadiness split barely separates these stations ([docs/segmentation_findings.md](docs/segmentation_findings.md)).
-- Forecast (any stockout in the next hour, 9 test days): a gradient-boosted model scores a Brier of 0.083 versus 0.099 for the best simple baseline (16.5% better, 95% interval 15.2% to 18.3%) and AUC 0.93; a placebo check collapses to chance. The edge shrinks with lead time: 8% better at 3 hours, and no better than a weekly-pattern average at 6 hours ([docs/forecast_findings.md](docs/forecast_findings.md)).
-- Simulation (a replica of the real network, assumption-bound; it understates empty stations, so only comparisons between strategies count): reactive rebalancing avoids about 4.6% of lost pickups; planning with a 3-hour forecast at the measured accuracy adds about 0.8% on top (21 pickups a day, 95% CI 14 to 28); a 6-hour forecast is worse than reacting to current counts; the rebalancing budget matters more than forecast accuracy ([docs/simulation_findings.md](docs/simulation_findings.md)).
-- Only two weekly cycles in one autumn month: no weather, holiday or seasonal conclusions.
+![Empty and full stations by hour of day](docs/figures/hourly_service_level.png)
 
-Project status and roadmap: [docs/master_timeline.md](docs/master_timeline.md).
+![Forecast accuracy by horizon](docs/figures/forecast_brier.png)
 
-## Why this project
-Inventory theory (ABC/XYZ segmentation, safety stock, service levels) transfers directly to
-bike-share operations, and a public live feed makes it checkable by anyone.
+![Simulation: forecast-driven versus reactive rebalancing](docs/figures/simulation_vs_reactive.png)
 
-## Architecture
+### Honest limits
+- **15 complete days in one autumn month.** No weather, holiday or seasonal conclusions yet; collection continues and the analysis will be re-run at 30, 60 and 90 days.
+- **The simulation compares strategies; it does not measure real savings.** It understates how often stations are empty (7.9% simulated against 13.3% real), and the truck budget is an assumption.
+- **No trip or truck data.** Activity is inferred from changes in bike counts, a lower bound on true trips.
+- Stockouts shorter than the 10-minute sampling can be missed, so rates are lower bounds.
 
+## Where to look
+| If you want... | Read |
+|---|---|
+| The story in one page | [docs/case_study.md](docs/case_study.md) |
+| How I'd explain it in an interview | [docs/interview_script.md](docs/interview_script.md) |
+| Findings, one per analysis | [data audit](docs/data_integrity_report.md) · [service level](docs/service_level_findings.md) · [segmentation](docs/segmentation_findings.md) · [forecast](docs/forecast_findings.md) · [simulation](docs/simulation_findings.md) |
+| Methods and definitions | [methodology](docs/methodology.md) · [analysis charter](docs/analysis_charter.md) · [dataset card](docs/dataset_card.md) |
+| The code | `src/ingest.py` (collector) · `dbt/` (SQL models and tests) · `src/forecast/` · `src/simulate/` · `dashboard/` (Shiny, local) |
+| Run it yourself | [docs/reproducing.md](docs/reproducing.md) |
+| Project status and roadmap | [docs/master_timeline.md](docs/master_timeline.md) |
+
+## How it works
+```mermaid
+flowchart LR
+    A[Valenbisi feed<br/>GBFS v3] --> C[GitHub Actions<br/>every 10 min]
+    W[Open-Meteo<br/>weather] --> C
+    T[Cloudflare Worker<br/>timer] --> C
+    C --> D[(Parquet snapshots<br/>on the data branch)]
+    D --> M[DuckDB + dbt<br/>staging, facts, KPI marts]
+    M --> F[Forecast<br/>rolling-origin backtest]
+    M --> S[Simulation<br/>rebalancing policies]
+    M --> B[Shiny dashboard]
 ```
-Valenbisi GBFS v3  -+
-                    +-> GitHub Actions (cron */10) -> Parquet snapshots -> `data` branch
-Open-Meteo weather -+        src/ingest.py            (Hive-partitioned)
-                                                           |
-                  dbt + DuckDB (dbt/): staging -> dim/fct -> KPI + ABC/XYZ marts
-                                                           |
-          src/forecast (baselines, GBM, rolling-origin backtest)    dashboard/ (Shiny, local)
-          src/simulate (Monte Carlo rebalancing policies)
-```
+- **Collection:** a small Python collector stores one parquet file per snapshot. A daily health check raises an issue if collection stalls.
+- **Modelling:** dbt models with data tests (no negative counts, capacity arithmetic, no long gaps, and more). CI builds them on a small synthetic sample.
+- **Reproducibility:** results come from a frozen, tagged copy of the data (`data-freeze-2026-10-24`), while collection continues on the live branch.
+- **Quality rules:** 50 automated tests; no number appears in a document unless a script produced it.
 
-What exists: ingestion with tests; dbt project with 39 passing checks on a synthetic sample (and on the
-real data, which is one snapshot so far); stockout/blockout KPI mart and ABC/XYZ segmentation (both
-flagged provisional until 14 days); forecasting scaffold; assumption-driven simulation scaffold;
-a Shiny dashboard skeleton fed by CSV exports. Method details: [docs/methodology.md](docs/methodology.md).
-
-## Data
-| Table | Grain | Notes |
-|---|---|---|
-| `station_status/` | station x snapshot | bikes, docks, disabled counts, flags, `last_reported` |
-| `run_meta/` | one row per run | HTTP status, latency, feed age, stale-station count, current weather, errors |
-| `station_information/` | station x day | name, coordinates, capacity (fetched once a day) |
-
-Snapshots live on the `data` branch to keep `main` clean:
-
-```bash
-git clone --branch data --single-branch https://github.com/<you>/valenbisi-inventory-lab data_repo
-python src/check_data.py data_repo     # health report: gaps, errors, feed freshness
-```
-
-## Known limitations (stated up front)
-- **Live feed only.** There is no public history, so analysis starts from the first snapshot.
-- **No trip data.** Activity is inferred from changes in bike counts, which understates true trips
-  (a bike out and a bike back between snapshots is invisible).
-- **`last_reported` is not a freshness signal.** Many stations show last-reported times hours behind the feed
-  timestamp, yet their bike counts keep changing (see [docs/data_integrity_report.md](docs/data_integrity_report.md)).
-  Data quality is therefore judged by how long a station's count has been unchanged instead.
-- **GitHub cron is best-effort.** Runs drift and can be skipped. Gaps are measured in `run_meta`.
-
-## Roadmap
-- [x] Ingestion pipeline + tests + CI
-- [x] DuckDB + dbt staging/marts with schema tests (synthetic sample in CI)
-- [x] Service-level KPI mart (stockout/blockout by station and hour, with coverage columns)
-- [x] ABC/XYZ segmentation (provisional until 14 days)
-- [x] Forecasting scaffold: persistence, hour-of-week, gradient boosting, rolling-origin backtest, Brier + calibration
-      (real scores withheld until >= 14 days; the CLI enforces this)
-- [x] Rebalancing Monte Carlo scaffold (all assumptions in `src/simulate/config.toml`)
-- [x] Local Shiny dashboard: overview, service level, segmentation, forecast, simulation, collection health (needs R with shiny, ggplot2, dplyr, scales). Forecast and simulation tabs read the tables in docs/*_results*.md, so they always match the scripts' output
-- [x] Data integrity audit and frozen dataset ([report](docs/data_integrity_report.md))
-- [x] Descriptive service-level results ([findings](docs/service_level_findings.md))
-- [x] Segmentation stability ([findings](docs/segmentation_findings.md))
-- [x] Real forecasting results, first version ([findings](docs/forecast_findings.md))
-- [x] Rebalancing simulation with data-based inputs and sensitivity analysis ([findings](docs/simulation_findings.md))
-- [ ] Weather and event effects (permutation tests, FDR correction)
-- [ ] Public dashboard
-
-## Run locally (Python 3.11+)
-```bash
-python -m venv .venv && source .venv/bin/activate        # Windows: .venv/Scripts/activate
-pip install -r requirements.txt -r requirements-dbt.txt
-pytest -q
-
-# model the data (real data in data_repo/, or the SYNTHETIC sample)
-dbt build --project-dir dbt --profiles-dir dbt --vars '{data_root: dbt/sample_data}'
-dbt build --project-dir dbt --profiles-dir dbt                 # uses data_repo/
-
-# reproduce the audit and the descriptive results on the frozen dataset (see docs/dataset_card.md)
-python src/audit/run_audit.py --data data_frozen --out docs/data_integrity_results.md --dbt-db dbt/target/valenbisi.duckdb
-python src/analysis/service_level.py --db dbt/target/valenbisi.duckdb --out docs/service_level_results.md
-Rscript analysis/plot_service_level.R
-
-# forecast and segmentation results on the frozen dataset
-python src/forecast/evaluate.py --db dbt/target/valenbisi.duckdb --out docs/forecast_results.md
-python src/analysis/segmentation_stability.py --db dbt/target/valenbisi.duckdb --out docs/segmentation_results.md
-
-# synthetic-data development of the forecaster, and the simulation
-python src/forecast/run.py --db dbt/target/valenbisi.duckdb --synthetic
-python src/simulate/run.py                                  # fully synthetic version
-python src/simulate/run_empirical.py --db dbt/target/valenbisi.duckdb --out docs/simulation_results.md   # data-based replica
-
-# dashboard (uses CSV exports of the marts)
-python src/export_marts.py --db dbt/target/valenbisi.duckdb --out dashboard/data
-Rscript -e 'shiny::runApp("dashboard")'
-```
-On Windows consoles set `PYTHONUTF8=1` before running `src/check_data.py`.
-
-## Attribution
-Station data: Valenbisi / JCDecaux, JCDecaux Open Licence. Weather: Open-Meteo.com (CC BY 4.0).
-Code: MIT.
+## Data and attribution
+Station data: Valenbisi / JCDecaux, JCDecaux Open Licence. Weather: Open-Meteo.com (CC BY 4.0). Code: MIT.

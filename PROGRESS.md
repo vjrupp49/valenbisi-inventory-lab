@@ -120,3 +120,8 @@
 ## 2026-11-04 Phase 9 done (first version)
 - docs/case_study.md (one-page story with links to each finding) and docs/interview_script.md (30 s, 2 min, expected questions). Numbers copied from the findings documents; refresh both after each data-freeze re-run.
 - README links the case study at the top of the results. GitHub repo description added.
+
+## 2026-11-05 GitHub presentation pass
+- README rewritten as a landing page (results table, three charts, honest limits, where-to-look table, architecture diagram); run instructions moved to docs/reproducing.md.
+- analysis/plot_model_results.R makes docs/figures/forecast_brier.png and simulation_vs_reactive.png from the generated results tables.
+- Repo topics added. Open: GitHub issue #2 (old false alarm) still visible on the public repo; Vincent to close.
