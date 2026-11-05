@@ -99,4 +99,8 @@
 - Phase 5: src/analysis/segmentation_stability.py -> docs/segmentation_results.md / segmentation_findings.md. Ranking stable (Spearman 0.98-0.99), A/B/C labels 90-93% agreement, 11-15% move with cutoffs, XYZ barely discriminates (253/273 are X) -> use rank, not labels; revisit XYZ with relative thresholds at 30+ days.
 - Phase 6: src/forecast/evaluate.py (+ StationMean/StationState baselines, AUC/log-loss, day-block bootstrap, placebo). Real results on frozen data: 1 h GBM Brier 0.083 vs 0.099 best baseline (skill 16.5%, CI 15.2-18.3%), AUC 0.93; 3 h skill 8.2%; 6 h no better than hour-of-week. Placebo AUC 0.51.
 - Caveats recorded: only 9 test days, intervals probably too narrow; model mostly uses min_bikes this hour (short-term tracking, not weekly routine).
-- Next: connect measured forecast skill to the simulation's forecast-noise knob; new freeze + re-run at ~30 days (around Nov 24).
+- Next: connect measured forecast skill to the simulation's forecast-noise knob; new freeze + re-run at 30 days of steady collection (~Nov 10; corrected from an earlier 'Nov 24'), then 60 (~Dec 10) and 90 days (~Jan 9).
+
+## 2026-11-04 Master timeline
+- Added docs/master_timeline.md (status by phase, dated history, roadmap to autumn 2027, automatic-vs-manual calendar, decisions, limits, definition of done for v1). Update it at the end of every phase.
+- Freeze schedule: 30 days ~2026-11-10, 60 days ~2026-12-10, 90 days ~2027-01-09. Token renewal reminder ~2027-02-15 (expiry 2027-03-01).

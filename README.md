@@ -20,6 +20,8 @@ rebalancing policy would have prevented the most of them.
 - Forecast (any stockout in the next hour, 9 test days): a gradient-boosted model scores a Brier of 0.083 versus 0.099 for the best simple baseline (16.5% better, 95% interval 15.2% to 18.3%) and AUC 0.93; a placebo check collapses to chance. The edge shrinks with lead time: 8% better at 3 hours, and no better than a weekly-pattern average at 6 hours ([docs/forecast_findings.md](docs/forecast_findings.md)).
 - Only two weekly cycles in one autumn month: no weather, holiday or seasonal conclusions.
 
+Project status and roadmap: [docs/master_timeline.md](docs/master_timeline.md).
+
 ## Why this project
 Inventory theory (ABC/XYZ segmentation, safety stock, service levels) transfers directly to
 bike-share operations, and a public live feed makes it checkable by anyone.
