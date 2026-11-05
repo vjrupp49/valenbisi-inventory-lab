@@ -14,7 +14,7 @@ impressive numbers**.
 ## 2. Where we are (snapshot, 2026-11-04)
 - **Collection:** running automatically since 2026-10-09. 3,756 runs so far, 3,752 successful; 27 UTC days of data. The four failures were an outage on the data provider's side (HTTP 503, Nov 2 to 3).
 - **Analysis:** data audit, descriptive results, station segmentation, a first real forecast and a data-based rebalancing simulation are done, each with a written findings document.
-- **Not yet done:** the finished dashboard, the final write-up and interview story, and the 30/60/90-day re-runs.
+- **Not yet done:** the final write-up and interview story, and the 30/60/90-day re-runs.
 - **Quality gates in place:** 43 automated tests, continuous-integration checks on every push (green), a daily health check on collection, a frozen reproducible dataset.
 
 ### Progress by phase
@@ -30,7 +30,7 @@ impressive numbers**.
 | 5 | Segmentation (ABC/XYZ) and stability | Done | 2026-11-04 | [segmentation_findings.md](segmentation_findings.md) |
 | 6 | Forecast backtest on real data | Done (first version) | 2026-11-04 | [forecast_findings.md](forecast_findings.md) |
 | 7 | Rebalancing simulation using measured inputs | Done (first version) | 2026-11-04 | [simulation_findings.md](simulation_findings.md) |
-| 8 | Dashboard (local) | Skeleton only | | `dashboard/app.R` |
+| 8 | Dashboard (local) | Done | 2026-11-04 | `dashboard/app.R` |
 | 9 | Write-up and interview story | Not started | | |
 | 10 | Keep collecting; re-run at 30, 60, 90 days | Planned | first re-run about 2026-11-10 | [analysis_plan.md](analysis_plan.md) |
 
@@ -65,7 +65,7 @@ Details and caveats are in the findings documents. Every number must come from a
 
 ### Short term (November to December 2026)
 3. **~2026-11-10: second freeze (30 days of steady collection, counting from 2026-10-10)** with a new tag (for example `data-freeze-2026-11-09`), then re-run the audit, service-level results, segmentation and forecast. Report what held up and what changed.
-4. **Phase 8, dashboard.** Finish the local Shiny app using the findings; it stays local unless you ask for public publishing.
+4. **Phase 8, dashboard.** Done 2026-11-04 (local only). Publishing it publicly needs your explicit go-ahead.
 5. **Phase 9, write-up.** Case-study page, README polish, one-page interview script (including the staleness story and why results are modest).
 6. **~2026-12-10: third freeze (60 days).** Then watch the Christmas and school-holiday period (exact dates to confirm), which falls in the 60 to 90 day window.
 
@@ -111,7 +111,7 @@ Details and caveats are in the findings documents. Every number must come from a
 
 ## 9. What "done" looks like for the portfolio version (v1)
 - [x] Phase 7 simulation with measured inputs and a sensitivity analysis (first version)
-- [ ] Phase 8 dashboard finished and tested locally
+- [x] Phase 8 dashboard finished and tested locally
 - [ ] Phase 9 case study, README polish, interview script
 - [ ] 30-day re-run completed and compared with the 15-day results
 - [ ] You can explain, without notes: what a stockout is here, why `last_reported` was dropped, why the forecast was tested the way it was, and what the results cannot show

@@ -36,7 +36,7 @@ Open-Meteo weather -+        src/ingest.py            (Hive-partitioned)
                                                            |
                   dbt + DuckDB (dbt/): staging -> dim/fct -> KPI + ABC/XYZ marts
                                                            |
-          src/forecast (baselines, GBM, rolling-origin backtest)    dashboard/ (Shiny skeleton)
+          src/forecast (baselines, GBM, rolling-origin backtest)    dashboard/ (Shiny, local)
           src/simulate (Monte Carlo rebalancing policies)
 ```
 
@@ -76,7 +76,7 @@ python src/check_data.py data_repo     # health report: gaps, errors, feed fresh
 - [x] Forecasting scaffold: persistence, hour-of-week, gradient boosting, rolling-origin backtest, Brier + calibration
       (real scores withheld until >= 14 days; the CLI enforces this)
 - [x] Rebalancing Monte Carlo scaffold (all assumptions in `src/simulate/config.toml`)
-- [x] Dashboard skeleton (Shiny; needs R with shiny, ggplot2, dplyr)
+- [x] Local Shiny dashboard: overview, service level, segmentation, forecast, simulation, collection health (needs R with shiny, ggplot2, dplyr, scales). Forecast and simulation tabs read the tables in docs/*_results*.md, so they always match the scripts' output
 - [x] Data integrity audit and frozen dataset ([report](docs/data_integrity_report.md))
 - [x] Descriptive service-level results ([findings](docs/service_level_findings.md))
 - [x] Segmentation stability ([findings](docs/segmentation_findings.md))

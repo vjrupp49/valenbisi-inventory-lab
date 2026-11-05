@@ -110,3 +110,9 @@
 - Realism fixes made while building: (1) independent per-station returns let the fleet drift, so trips now conserve bikes (returns follow served pickups; trip time 0.318 h from Little's law); (2) rerouting displaced bikes to the emptiest stations was free rebalancing, replaced by 'retry next hour'.
 - Statistics fix: first reported the spread across replications as an interval; now a 95% CI for the mean.
 - Findings (docs/simulation_findings.md): reactive avoids ~4.6% of lost pickups; forecast_3h +21/day over reactive (CI 14-28), oracle +25; 6 h forecast worse than reactive; budget matters more than forecast quality; the replica understates empty stations (7.9% vs 13.3%), so only relative comparisons count.
+
+## 2026-11-04 Phase 8 done (local dashboard)
+- dashboard/app.R: tabs Overview, Service level (hourly line + heatmap), Segmentation, Forecast (Brier by horizon, calibration), Simulation (avoided pickups, paired difference vs reactive, budget/demand sensitivity, validation), Collection health.
+- Forecast and simulation tabs parse the tables from docs/*_results*.md, so no number is typed by hand; the overview figures are computed from the exported marts and results files. Simulation tab carries the 'what-if machine, not a measurement' banner.
+- Checked by launching the app and opening every tab (no server or console errors). .claude/launch.json added so the preview can start it. Not published; public hosting still needs an explicit ask.
+- Dashboard CSVs in dashboard/data are gitignored; regenerate with src/export_marts.py (the current copy is from the frozen data, exported 2026-10-25).
