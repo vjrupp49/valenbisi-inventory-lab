@@ -112,7 +112,7 @@ Details and caveats are in the findings documents. Every number must come from a
 ## 9. What "done" looks like for the portfolio version (v1)
 - [x] Phase 7 simulation with measured inputs and a sensitivity analysis (first version)
 - [x] Phase 8 dashboard finished and tested locally
-- [ ] Phase 9 case study, README polish, interview script
+- [x] Phase 9 case study, README polish, interview script (first version; refresh numbers after each re-run)
 - [ ] 30-day re-run completed and compared with the 15-day results
 - [ ] You can explain, without notes: what a stockout is here, why `last_reported` was dropped, why the forecast was tested the way it was, and what the results cannot show
 A decision for later: whether to publish a public dashboard or page (needs your explicit go-ahead; currently not allowed by the project rules).

@@ -11,6 +11,8 @@ rebalancing policy would have prevented the most of them.
 > Segmentation, a 1-hour-ahead stockout forecast and a data-based rebalancing simulation now have first results, with stated
 > limits (the simulation is assumption-bound). Everything below comes from scripts in this repo on a frozen two-week dataset.
 
+**New here? Start with the [one-page case study](docs/case_study.md).**
+
 ## First results (frozen dataset, 15 complete days; details and caveats in [docs/service_level_findings.md](docs/service_level_findings.md))
 - Stations are empty about 13% of the time and full about 7% of the time (stockout rate 13.4% headline, 12.9% to 13.9% depending on how stuck readings are treated; blockout 6.7%). Stockouts are lower bounds because stockouts shorter than the 10-minute sampling can be missed.
 - Strongly time-of-day dependent: on weekdays about 19% of stations are empty around 02:00 and about 11% mid-afternoon; about 16% are full at 03:00 and about 2% at 15:00.

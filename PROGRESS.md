@@ -116,3 +116,7 @@
 - Forecast and simulation tabs parse the tables from docs/*_results*.md, so no number is typed by hand; the overview figures are computed from the exported marts and results files. Simulation tab carries the 'what-if machine, not a measurement' banner.
 - Checked by launching the app and opening every tab (no server or console errors). .claude/launch.json added so the preview can start it. Not published; public hosting still needs an explicit ask.
 - Dashboard CSVs in dashboard/data are gitignored; regenerate with src/export_marts.py (the current copy is from the frozen data, exported 2026-10-25).
+
+## 2026-11-04 Phase 9 done (first version)
+- docs/case_study.md (one-page story with links to each finding) and docs/interview_script.md (30 s, 2 min, expected questions). Numbers copied from the findings documents; refresh both after each data-freeze re-run.
+- README links the case study at the top of the results. GitHub repo description added.
