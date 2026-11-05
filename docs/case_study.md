@@ -49,7 +49,7 @@ I built a replica of the network from the data (real stations, capacities, deman
 - **The simulation is a what-if machine, not a measurement.** The replica understates empty stations (7.9% simulated versus 13.3% real), so only comparisons between strategies carry information, and they carry my assumptions (truck budget, timing, how riders react).
 - **Short history.** 15 days, one season. Intervals from resampling days are probably too narrow.
 - **No trip or truck data.** Activity is inferred from count changes, a lower bound.
-- **Mistakes I caught.** An early simulation let bikes appear from nowhere; another version sent bikes to empty stations for free and would have flattered every strategy; my first confidence intervals measured the spread of single runs, not the uncertainty of the average. Each was fixed and is recorded in [PROGRESS.md](../PROGRESS.md).
+- **Mistakes I caught.** An early simulation let bikes appear from nowhere; another version sent bikes to empty stations for free and would have flattered every strategy; my first confidence intervals measured the spread of single runs, not the uncertainty of the average. Each was fixed and is recorded in [PROGRESS.md](PROGRESS.md).
 
 ## What's next
 Data collection continues, so the analysis re-runs on 30, 60 and 90 days (the 90-day mark is around Jan 9 2027) to see which findings hold and to test holidays and weather. Data: JCDecaux Open Licence; weather: Open-Meteo (CC BY 4.0).

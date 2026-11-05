@@ -20,7 +20,7 @@ Numbers match [case_study.md](case_study.md). If you re-run the analysis, update
 - **How do you know the model isn't just memorising?** A placebo test (swapping features between stations in the same hour) drops it to chance, and its probabilities are calibrated (when it says 75%, stockouts happen about 74% of the time).
 - **Why is the forecast edge small in the simulation?** The model mostly detects "nearly empty and still falling", which reactive rules already capture. Its extra value is a few hours of lead time, and trucks are the bottleneck.
 - **Can you trust the simulation?** Only for comparing strategies. It understates empty stations (7.9% versus 13.3% real), and the truck budget and rider behaviour are assumptions. I show sensitivity to both.
-- **What mistakes did you catch?** Simulated bikes appearing from nowhere; a rebalancing shortcut that acted as free trucks and flattered every strategy; confidence intervals that measured single-run spread instead of the uncertainty of the average. All logged in PROGRESS.md.
+- **What mistakes did you catch?** Simulated bikes appearing from nowhere; a rebalancing shortcut that acted as free trucks and flattered every strategy; confidence intervals that measured single-run spread instead of the uncertainty of the average. All logged in docs/PROGRESS.md.
 - **What would you do with more time or data?** Re-run at 30, 60 and 90 days; add weather and holidays once enough rainy days exist; add geography (riders detouring to nearby stations) and get real truck data.
 - **What did you not do?** No trip data, no truck data, no claim about real savings.
 

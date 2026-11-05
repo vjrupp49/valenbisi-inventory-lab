@@ -122,7 +122,7 @@ A decision for later: whether to publish a public dashboard or page (needs your 
 |---|---|
 | Plain-language overview | [README.md](../README.md) |
 | Rules for Claude | [CLAUDE.md](../CLAUDE.md) |
-| Running log, decisions, blockers | [PROGRESS.md](../PROGRESS.md) |
+| Running log, decisions, blockers | [PROGRESS.md](PROGRESS.md) |
 | Plan and charter | [analysis_plan.md](analysis_plan.md), [analysis_charter.md](analysis_charter.md) |
 | Method | [methodology.md](methodology.md) |
 | Collector and timer | `src/ingest.py`, `.github/workflows/ingest.yml`, `cloudflare/` |

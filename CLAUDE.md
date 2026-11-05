@@ -11,7 +11,7 @@ then forecast stockouts and simulate rebalancing policies. Quality and honesty m
    (and edit `.github/workflows/*`, `src/ingest.py`, and the `data` branch workflow) when the change is tested.
    Because the scheduled collector runs from `main`, a broken `ingest.yml` or `ingest.py` silently stops data collection:
    so run `pytest -q`, validate workflow YAML, and confirm the next scheduled run after any change to them.
-2. **Changes to the collector** (`ingest.yml`, `src/ingest.py`): log the change and reason in PROGRESS.md and verify afterwards.
+2. **Changes to the collector** (`ingest.yml`, `src/ingest.py`): log the change and reason in docs/PROGRESS.md and verify afterwards.
 3. **No fabricated results.** Never put a number, chart, finding or "key result" in the README or any
    doc unless a script in this repo produced it from real collected data. Short history is a
    limitation to state, not hide. Use synthetic data only for tests and clearly label it.
@@ -37,19 +37,19 @@ Refresh with: `git -C data_repo pull` (clone with `git clone --branch data --sin
 
 ## Definition of done for any task
 Tests pass (`pytest -q`), `dbt build` passes when dbt models exist, README/docs match what the code
-actually does, change committed with a clear message, entry added to PROGRESS.md.
+actually does, change committed with a clear message, entry added to docs/PROGRESS.md.
 
 ## Working style
 - Small, reviewable commits. Commit after every green checkpoint so a crash or usage limit loses nothing.
-- Keep PROGRESS.md updated: done, in progress, blocked (and why), decisions made, questions for Vincent.
-- If blocked or unsure on something irreversible or ambiguous, write the question in PROGRESS.md,
+- Keep docs/PROGRESS.md updated: done, in progress, blocked (and why), decisions made, questions for Vincent.
+- If blocked or unsure on something irreversible or ambiguous, write the question in docs/PROGRESS.md,
   skip that item, and continue with the next one.
 - Vincent knows R and Quarto well, Python and SQL less; comment non-obvious SQL and keep structure simple.
 
 ## Real-data phase
 See docs/analysis_plan.md (written 2026-10-25). Do the data integrity audit first; stop for review at the gates it lists.
 
-## Original roadmap (scaffolding phase, done; tick off in PROGRESS.md)
+## Original roadmap (scaffolding phase, done; tick off in docs/PROGRESS.md)
 1. Environment: venv, `pip install -r requirements.txt dbt-duckdb`; verify pytest green.
 2. Pull `data_repo`; run `python src/check_data.py data_repo`; record findings (gap sizes, feed freshness,
    share of stale stations) in `docs/data_quality_findings.md` using ONLY what the output shows.

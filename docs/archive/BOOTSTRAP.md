@@ -1,3 +1,5 @@
+> Archived: the original overnight-build instructions (October 2026). Kept for the record; the project has moved on. The running log now lives at docs/PROGRESS.md.
+
 # BOOTSTRAP: one-shot setup and overnight build
 
 You are Claude Code, running unattended in this folder while Vincent sleeps. Vincent has explicitly
