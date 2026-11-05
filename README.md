@@ -8,8 +8,8 @@ feed continuously, models it in SQL (DuckDB + dbt), forecasts stockouts, and sim
 rebalancing policy would have prevented the most of them.
 
 > **Status: collecting continuously; first descriptive results and a data-integrity audit are done.**
-> Segmentation and a 1-hour-ahead stockout forecast now have first real results, with stated limits; the rebalancing
-> simulation is still assumption-driven. Everything below comes from scripts in this repo on a frozen two-week dataset.
+> Segmentation, a 1-hour-ahead stockout forecast and a data-based rebalancing simulation now have first results, with stated
+> limits (the simulation is assumption-bound). Everything below comes from scripts in this repo on a frozen two-week dataset.
 
 ## First results (frozen dataset, 15 complete days; details and caveats in [docs/service_level_findings.md](docs/service_level_findings.md))
 - Stations are empty about 13% of the time and full about 7% of the time (stockout rate 13.4% headline, 12.9% to 13.9% depending on how stuck readings are treated; blockout 6.7%). Stockouts are lower bounds because stockouts shorter than the 10-minute sampling can be missed.
@@ -18,6 +18,7 @@ rebalancing policy would have prevented the most of them.
 - Data caveat that changed the method: the feed's `last_reported` field barely moves when bike counts do, so data quality is judged by how long a count has been frozen instead ([docs/data_integrity_report.md](docs/data_integrity_report.md)).
 - Segments are stable in rank but not in labels: station activity ranks agree at 0.98 to 0.99 (Spearman) between halves of the period; A/B/C labels agree for 90% to 93% of stations and move for 11% to 15% when the cut-offs shift; the textbook XYZ steadiness split barely separates these stations ([docs/segmentation_findings.md](docs/segmentation_findings.md)).
 - Forecast (any stockout in the next hour, 9 test days): a gradient-boosted model scores a Brier of 0.083 versus 0.099 for the best simple baseline (16.5% better, 95% interval 15.2% to 18.3%) and AUC 0.93; a placebo check collapses to chance. The edge shrinks with lead time: 8% better at 3 hours, and no better than a weekly-pattern average at 6 hours ([docs/forecast_findings.md](docs/forecast_findings.md)).
+- Simulation (a replica of the real network, assumption-bound; it understates empty stations, so only comparisons between strategies count): reactive rebalancing avoids about 4.6% of lost pickups; planning with a 3-hour forecast at the measured accuracy adds about 0.8% on top (21 pickups a day, 95% CI 14 to 28); a 6-hour forecast is worse than reacting to current counts; the rebalancing budget matters more than forecast accuracy ([docs/simulation_findings.md](docs/simulation_findings.md)).
 - Only two weekly cycles in one autumn month: no weather, holiday or seasonal conclusions.
 
 Project status and roadmap: [docs/master_timeline.md](docs/master_timeline.md).
@@ -80,7 +81,7 @@ python src/check_data.py data_repo     # health report: gaps, errors, feed fresh
 - [x] Descriptive service-level results ([findings](docs/service_level_findings.md))
 - [x] Segmentation stability ([findings](docs/segmentation_findings.md))
 - [x] Real forecasting results, first version ([findings](docs/forecast_findings.md))
-- [ ] Simulation parameters estimated from real data
+- [x] Rebalancing simulation with data-based inputs and sensitivity analysis ([findings](docs/simulation_findings.md))
 - [ ] Weather and event effects (permutation tests, FDR correction)
 - [ ] Public dashboard
 
@@ -105,7 +106,8 @@ python src/analysis/segmentation_stability.py --db dbt/target/valenbisi.duckdb -
 
 # synthetic-data development of the forecaster, and the simulation
 python src/forecast/run.py --db dbt/target/valenbisi.duckdb --synthetic
-python src/simulate/run.py
+python src/simulate/run.py                                  # fully synthetic version
+python src/simulate/run_empirical.py --db dbt/target/valenbisi.duckdb --out docs/simulation_results.md   # data-based replica
 
 # dashboard (uses CSV exports of the marts)
 python src/export_marts.py --db dbt/target/valenbisi.duckdb --out dashboard/data

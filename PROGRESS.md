@@ -104,3 +104,9 @@
 ## 2026-11-04 Master timeline
 - Added docs/master_timeline.md (status by phase, dated history, roadmap to autumn 2027, automatic-vs-manual calendar, decisions, limits, definition of done for v1). Update it at the end of every phase.
 - Freeze schedule: 30 days ~2026-11-10, 60 days ~2026-12-10, 90 days ~2027-01-09. Token renewal reminder ~2027-02-15 (expiry 2027-03-01).
+
+## 2026-11-04 Phase 7 done (first version)
+- src/simulate/empirical.py + run_empirical.py: estimates demand/stations/trip time/burstiness from the dbt tables, matches forecast noise to measured AUC, runs policies + sensitivity grid, validates the replica against the real network. Estimated inputs saved in src/simulate/estimated/.
+- Realism fixes made while building: (1) independent per-station returns let the fleet drift, so trips now conserve bikes (returns follow served pickups; trip time 0.318 h from Little's law); (2) rerouting displaced bikes to the emptiest stations was free rebalancing, replaced by 'retry next hour'.
+- Statistics fix: first reported the spread across replications as an interval; now a 95% CI for the mean.
+- Findings (docs/simulation_findings.md): reactive avoids ~4.6% of lost pickups; forecast_3h +21/day over reactive (CI 14-28), oracle +25; 6 h forecast worse than reactive; budget matters more than forecast quality; the replica understates empty stations (7.9% vs 13.3%), so only relative comparisons count.

@@ -39,6 +39,12 @@ class World:
     returns: np.ndarray         # (T, N) realised
     static_route: np.ndarray    # indices of stations on the static route
     init_bikes: np.ndarray
+    # Optional trip-conserving mode (used by empirical.py): returns are not pre-drawn. Instead the bikes served as pickups in
+    # hour t-1 come back in hour t, spread over stations with probabilities dest_p[t]; u_ret holds fixed uniforms so every
+    # policy sees the same randomness (common random numbers). When dest_p is None, `returns` is used as before.
+    dest_p: np.ndarray | None = None
+    u_ret: np.ndarray | None = None
+    trip_same_hour: float = 0.0   # share of an hour's served pickups that come back within that same hour (rest: next hour)
 
 
 def _pulse(hour: np.ndarray, cfg: dict) -> np.ndarray:
@@ -107,6 +113,19 @@ def _transfers(bikes: np.ndarray, capacity: np.ndarray, level: np.ndarray, candi
     return done
 
 
+def returns_at(world: World, t: int, served_prev: float, served_now: float = 0.0, carry: float = 0.0) -> np.ndarray:
+    """Returns arriving in hour t: the pre-drawn array, or (trip-conserving mode) Poisson draws whose total
+    follows the pickups actually served in the previous hour."""
+    if world.dest_p is None:
+        return world.returns[t]
+    from scipy.stats import poisson
+
+    th = world.trip_same_hour
+    # carry = bikes that found a full station last hour and keep circulating (no free rebalancing, fleet conserved)
+    mu = np.maximum((th * served_now + (1 - th) * served_prev + carry) * world.dest_p[t], 1e-12)
+    return poisson.ppf(world.u_ret[t], mu).astype(int)
+
+
 def run_policy(world: World, cfg: dict, policy: str, rng_fc: np.random.Generator) -> dict:
     assert policy in POLICIES
     rb, fc = cfg["rebalancing"], cfg["forecast"]
@@ -117,7 +136,11 @@ def run_policy(world: World, cfg: dict, policy: str, rng_fc: np.random.Generator
     T = world.pickups.shape[0]
     lost_pick = lost_ret = served_pick = served_ret = transfers = 0
     stockout_station_hours = blockout_station_hours = 0
+    so_by_hod = np.zeros(24, dtype=int)
+    bo_by_hod = np.zeros(24, dtype=int)
     all_idx = np.arange(cap.size)
+    served_prev = float(world.lam_in[0].sum())
+    carry = 0.0
 
     for t in range(T):
         if policy != "none" and (t % 24) in rb["round_hours"]:
@@ -133,18 +156,24 @@ def run_policy(world: World, cfg: dict, policy: str, rng_fc: np.random.Generator
                 projected = np.clip(bikes - f_hat, 0, cap)
                 transfers += _transfers(bikes, cap, projected, all_idx, budget, rb["truck_capacity"], target)
 
-        p, r = world.pickups[t], world.returns[t]
+        p = world.pickups[t]
         sp = np.minimum(p, bikes)
+        served_now = float(sp.sum())
+        r = returns_at(world, t, served_prev, served_now, carry)
+        served_prev = served_now
         bikes = bikes - sp
         free = cap - bikes
         sr = np.minimum(r, free)
         bikes = bikes + sr
+        carry = float((r - sr).sum()) if world.dest_p is not None else 0.0
         lost_pick += int((p - sp).sum())
         lost_ret += int((r - sr).sum())
         served_pick += int(sp.sum())
         served_ret += int(sr.sum())
         stockout_station_hours += int((bikes == 0).sum())
         blockout_station_hours += int((bikes == cap).sum())
+        so_by_hod[t % 24] += int((bikes == 0).sum())
+        bo_by_hod[t % 24] += int((bikes == cap).sum())
 
     demand = served_pick + lost_pick
     return {
@@ -154,6 +183,8 @@ def run_policy(world: World, cfg: dict, policy: str, rng_fc: np.random.Generator
         "lost_returns": lost_ret,
         "stockout_station_hours": stockout_station_hours,
         "blockout_station_hours": blockout_station_hours,
+        "stockout_by_hod": so_by_hod.tolist(),
+        "blockout_by_hod": bo_by_hod.tolist(),
         "transfers": transfers,
         "cost": transfers * rb["cost_per_transfer"],
     }

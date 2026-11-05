@@ -49,13 +49,17 @@ the first snapshot if none has been seen, so it is a lower bound at the start of
   results in `docs/forecast_findings.md`. Synthetic data (`src/synth.py`) is used only for development and tests.
 
 ## 5. Simulation (`src/simulate/`)
-- Monte Carlo of pickups/returns per station-hour, with lost demand when empty/full, and four policies
-  (none, static route, reactive, forecast-driven) given the same transfer budget and the same demand draws.
-- Every parameter, including forecast quality, is an assumption in `src/simulate/config.toml`. Outputs compare
-  policies under those assumptions; they are not estimates of real Valenbisi performance.
-- Planned: estimate the demand block from real data once enough history exists.
+- Two simulators share `src/simulate/config.toml`. `run.py` is the original fully synthetic one (every number an assumption).
+- `run_empirical.py` (Phase 7) is a replica of the real network: real stations, capacities, starting levels, pickup patterns,
+  day-to-day variation, bursty arrivals and trip time (all estimated in `empirical.py` from the frozen dataset), trips that
+  conserve bikes (a served pickup comes back as a return, a bike at a full station retries next hour), and forecast noise
+  matched to the measured forecast accuracy. Rebalancing budget, timing, target fill and the demand scale stay assumptions.
+- Policies: none, static route, reactive (current counts), forecast-driven (1, 3, 6 hours), oracle. Common random numbers,
+  paired differences, 95% confidence intervals for the mean over replications, sensitivity to demand scale and budget.
+- It understates how often stations are empty (see `docs/simulation_findings.md`), so only comparisons between
+  policies are meaningful; outputs are not estimates of real Valenbisi performance.
 
 ## 6. Not done yet / open questions
 - Weather and event effects (needs weeks of data).
 - Whether `last_reported` really refreshes in a daily batch (hypothesis from the audit, not proven).
-- Plugging the fitted forecaster into the simulator instead of a noise knob.
+- Station coordinates for detours and truck routing in the simulator (geography is not modelled).

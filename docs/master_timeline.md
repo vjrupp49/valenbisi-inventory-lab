@@ -1,7 +1,7 @@
 # Master project timeline and outline
 
 The one page to open when you want to know where the project stands. Update it at the end of every phase.
-**Last updated: 2026-11-04.** Repository: https://github.com/vjrupp49/valenbisi-inventory-lab
+**Last updated: 2026-11-04 (after Phase 7).** Repository: https://github.com/vjrupp49/valenbisi-inventory-lab
 
 ## 1. The project in one paragraph
 Valencia's bike-share system (Valenbisi) treated as an inventory problem: each station is a shelf, bikes are stock,
@@ -13,8 +13,8 @@ impressive numbers**.
 
 ## 2. Where we are (snapshot, 2026-11-04)
 - **Collection:** running automatically since 2026-10-09. 3,756 runs so far, 3,752 successful; 27 UTC days of data. The four failures were an outage on the data provider's side (HTTP 503, Nov 2 to 3).
-- **Analysis:** data audit, descriptive results, station segmentation and a first real forecast are done, each with a written findings document.
-- **Not yet done:** the simulation using real forecast accuracy, the finished dashboard, the final write-up and interview story, and the 30/60/90-day re-runs.
+- **Analysis:** data audit, descriptive results, station segmentation, a first real forecast and a data-based rebalancing simulation are done, each with a written findings document.
+- **Not yet done:** the finished dashboard, the final write-up and interview story, and the 30/60/90-day re-runs.
 - **Quality gates in place:** 43 automated tests, continuous-integration checks on every push (green), a daily health check on collection, a frozen reproducible dataset.
 
 ### Progress by phase
@@ -29,7 +29,7 @@ impressive numbers**.
 | 4 | Descriptive service-level analysis | Done | 2026-10-25 | [service_level_findings.md](service_level_findings.md) |
 | 5 | Segmentation (ABC/XYZ) and stability | Done | 2026-11-04 | [segmentation_findings.md](segmentation_findings.md) |
 | 6 | Forecast backtest on real data | Done (first version) | 2026-11-04 | [forecast_findings.md](forecast_findings.md) |
-| 7 | Rebalancing simulation using measured inputs | **Next** | | `src/simulate/` |
+| 7 | Rebalancing simulation using measured inputs | Done (first version) | 2026-11-04 | [simulation_findings.md](simulation_findings.md) |
 | 8 | Dashboard (local) | Skeleton only | | `dashboard/app.R` |
 | 9 | Write-up and interview story | Not started | | |
 | 10 | Keep collecting; re-run at 30, 60, 90 days | Planned | first re-run about 2026-11-10 | [analysis_plan.md](analysis_plan.md) |
@@ -48,17 +48,19 @@ and the long-run re-checks. The re-checks are what turns a two-week snapshot int
 | 2026-10-25 | CI broke after a DuckDB major update; fixed. |
 | 2026-11-02 to 03 | Provider outage (503) caused 4 failed runs; collection resumed unaided. |
 | 2026-11-04 | Segmentation stability and the first real forecast results. This timeline written. |
+| 2026-11-04 | Phase 7: data-based simulation. Two realism fixes along the way (bike conservation; no free rebalancing of displaced bikes). |
 
 ## 4. What the project has found so far (all from scripts on the frozen 15-day dataset)
 - Stations are empty about 13% of the time and full about 7%; strongly time-of-day dependent; concentrated in a few stations.
 - The feed's `last_reported` field is unreliable as a freshness signal, which changed our data-quality method.
 - Station activity ranking is very stable; the A/B/C labels are softer; the XYZ steadiness split barely separates stations.
 - A forecast of "any stockout next hour" beats simple baselines by about 16% on Brier score, with the advantage fading by 3 to 6 hours.
+- In a simulation of the network (assumption-bound; it understates empty stations), forecast-driven rebalancing beats reactive rebalancing by a small amount, and the rebalancing budget matters more than forecast accuracy.
 Details and caveats are in the findings documents. Every number must come from a script in this repo.
 
 ## 5. What is coming, in order
 ### Immediate (the next working session)
-1. **Phase 7, simulation.** Replace the simulation's arbitrary "forecast noise" setting with values matched to the measured 1-hour and 3-hour accuracy; estimate the demand shape from data where possible; add a sensitivity analysis showing which assumptions matter most. Output stays labelled "assumption-driven".
+1. **Second freeze and re-run (~2026-11-10).** Re-run the audit, service-level results, segmentation, forecast and simulation on 30 days of data.
 2. **Housekeeping.** Close GitHub issue #2 (old false alarm).
 
 ### Short term (November to December 2026)
@@ -108,7 +110,7 @@ Details and caveats are in the findings documents. Every number must come from a
 - **Dependence on two outside services:** the data provider (outages happen; one so far) and the Cloudflare timer (token expiry 2027-03-01).
 
 ## 9. What "done" looks like for the portfolio version (v1)
-- [ ] Phase 7 simulation with measured inputs and a sensitivity analysis
+- [x] Phase 7 simulation with measured inputs and a sensitivity analysis (first version)
 - [ ] Phase 8 dashboard finished and tested locally
 - [ ] Phase 9 case study, README polish, interview script
 - [ ] 30-day re-run completed and compared with the 15-day results

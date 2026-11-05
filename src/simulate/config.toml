@@ -1,6 +1,9 @@
-# Every number below is an ASSUMPTION, not an estimate from the Valenbisi data. Results from this
-# simulator are illustrations of how policies compare under these assumptions only. Replace the
-# demand block with values estimated from real data once enough history exists, and say so.
+# Two simulators share this file.
+#  * src/simulate/run.py (synthetic): every number below is an ASSUMPTION, not an estimate from the Valenbisi data.
+#  * src/simulate/run_empirical.py (Phase 7): the [demand] and [system] size/capacity blocks are IGNORED. Demand rates,
+#    stations, capacities and day-to-day variation come from the frozen dataset; forecast noise is matched to the measured
+#    forecast accuracy. What stays an assumption there: [rebalancing] (the budget and timing) and [empirical] scales.
+#    Results from either simulator compare policies under stated assumptions; they are not estimates of real savings.
 
 [system]
 n_stations = 60
@@ -40,3 +43,14 @@ abs_noise = 1.0
 [monte_carlo]
 n_replications = 200
 seed = 42
+
+[empirical]
+# Settings for src/simulate/run_empirical.py only.
+estimate_dir = "src/simulate/estimated"      # demand_rates.csv, stations.csv, summary.json written from the data
+baseline_demand_scale = 1.0                  # counted pickups are a lower bound on true trips; the grid below tests higher values
+demand_scales = [1.0, 1.5, 2.0]
+transfers_per_round = [3, 6, 12]             # rebalancing budget: transfers per round (baseline = n_trucks * transfers_per_truck_per_round = 6)
+n_replications = 100                         # baseline scenario
+grid_replications = 40                       # each cell of the sensitivity grid
+calibration_replications = 30
+seed = 11
