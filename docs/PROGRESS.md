@@ -125,3 +125,7 @@
 - README rewritten as a landing page (results table, three charts, honest limits, where-to-look table, architecture diagram); run instructions moved to docs/reproducing.md.
 - analysis/plot_model_results.R makes docs/figures/forecast_brier.png and simulation_vs_reactive.png from the generated results tables.
 - Repo topics added. Open: GitHub issue #2 (old false alarm) still visible on the public repo; Vincent to close.
+
+## 2026-11-12 Check-in after failure emails
+- Cause: 2026-11-11 20:20 to 20:50 UTC, four ingest runs failed (3 `startup_failure` "workflow file issue", 1 job failure with no logs). The same workflow file succeeded before and after unchanged, so this looks like a GitHub Actions platform blip, not a code or timer problem. Collection resumed unaided at 21:00; 4 snapshots lost (gap 20:10 to 21:00). Since Nov 10: 196 successful ingest runs of 200. Health watchdog and CI green. No change made.
+- Pending: second data freeze and 30-day re-run (was due ~Nov 10).
