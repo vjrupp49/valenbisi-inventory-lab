@@ -52,7 +52,7 @@ banner_text <- function(meta) {
   prefix <- if (isTRUE(as.logical(meta$synthetic))) "SYNTHETIC DATA - NOT REAL. " else ""
   paste0(prefix, meta$n_snapshots, " station-snapshots over ", meta$n_days, " calendar day(s) (",
          substr(meta$first_ts, 1, 10), " to ", substr(meta$last_ts, 1, 10), "). ",
-         if (meta$n_days < 30) "Under 30 days in one season: results are first looks, not seasonal conclusions." else "")
+         if (meta$n_days < 90) "Under 90 days, one season: results are early looks, not seasonal conclusions." else "")
 }
 
 note <- function(...) tags$p(style = "color:#555;max-width:900px;", ...)

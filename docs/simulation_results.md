@@ -8,21 +8,21 @@ Counted pickups and returns are lower bounds on true trips. Jumps of 8 bikes or 
 
 | item | value |
 |---|---|
-| n_stations_simulated | 271 |
-| n_stations_excluded_low_exposure | 1 |
-| n_days_used | 15 |
+| n_stations_simulated | 272 |
+| n_stations_excluded_low_exposure | 0 |
+| n_days_used | 33 |
 | jump_threshold_bikes | 8 |
-| jumps_up_per_day | 27.47 |
-| jumps_down_per_day | 27.27 |
-| counted_pickups_per_station_day_mean | 46.71 |
-| counted_returns_per_station_day_mean | 43.96 |
-| sigma_city_day | 0.2944 |
-| sigma_station_day | 0.1756 |
-| hourly_dispersion | 0.2983 |
-| night_station_level_bikes | 7.583 |
-| day_mean_station_level_bikes | 6.964 |
-| trip_hours | 0.3177 |
-| capacity_mean | 19.73 |
+| jumps_up_per_day | 26.73 |
+| jumps_down_per_day | 27.67 |
+| counted_pickups_per_station_day_mean | 47.07 |
+| counted_returns_per_station_day_mean | 44.55 |
+| sigma_city_day | 0.216 |
+| sigma_station_day | 0.1757 |
+| hourly_dispersion | 0.2892 |
+| night_station_level_bikes | 7.664 |
+| day_mean_station_level_bikes | 7.041 |
+| trip_hours | 0.3178 |
+| capacity_mean | 19.77 |
 
 ## E2. Forecast noise matched to the measured forecast accuracy
 
@@ -30,9 +30,9 @@ In the simulator the forecast predicts net bike outflow over the next H hours wi
 
 | horizon_h | measured_auc | noise_sd_bikes | auc_with_no_noise | auc_reactive_current_count_only | stockout_event_rate | note |
 |---|---|---|---|---|---|---|
-| 1 | 0.9293 | 0 | 0.9142 | 0.9053 | 0.0772 | target AUC is not reachable even with no forecast noise; using noise 0 |
-| 3 | 0.811 | 2.367 | 0.8471 | 0.8449 | 0.1549 |  |
-| 6 | 0.7136 | 6.922 | 0.8163 | 0.7972 | 0.2402 |  |
+| 1 | 0.9294 | 0 | 0.9112 | 0.9 | 0.0735 | target AUC is not reachable even with no forecast noise; using noise 0 |
+| 3 | 0.8076 | 1.963 | 0.8331 | 0.8298 | 0.1518 |  |
+| 6 | 0.7076 | 6.575 | 0.8027 | 0.7729 | 0.2375 |  |
 
 ## E2b. Does the simulated network resemble the real one? (validation)
 
@@ -40,31 +40,31 @@ Real = the frozen dataset's headline shares (which include whatever rebalancing 
 
 | measure | real | simulated_no_rebalancing |
 |---|---|---|
-| share of station-time empty | 0.1333 | 0.0793 |
-| share of station-time full | 0.0665 | 0.0605 |
-| mean bikes per station | 6.908 | 7.156 |
+| share of station-time empty | 0.1284 | 0.0774 |
+| share of station-time full | 0.0632 | 0.0599 |
+| mean bikes per station | 6.993 | 7.37 |
 
 ### Do simulated stations rank like real ones?
 
 | measure | spearman_across_stations | stations |
 |---|---|---|
-| empty | 0.838 | 271 |
-| full | 0.855 | 271 |
-| mean_bikes | 0.906 | 271 |
+| empty | 0.839 | 272 |
+| full | 0.864 | 272 |
+| mean_bikes | 0.904 | 272 |
 
 ### Time-of-day pattern
 
 | madrid_hours | real_empty | sim_empty | real_full | sim_full |
 |---|---|---|---|---|
-| night 00-05 | 0.1577 | 0.1052 | 0.1204 | 0.0907 |
-| morning 06-11 | 0.1267 | 0.0772 | 0.057 | 0.0443 |
-| afternoon 12-17 | 0.1195 | 0.0631 | 0.032 | 0.0435 |
-| evening 18-23 | 0.1295 | 0.0715 | 0.0562 | 0.0633 |
+| night 00-05 | 0.151 | 0.1066 | 0.1154 | 0.0933 |
+| morning 06-11 | 0.1256 | 0.0734 | 0.0522 | 0.04 |
+| afternoon 12-17 | 0.1156 | 0.0592 | 0.0319 | 0.0425 |
+| evening 18-23 | 0.1216 | 0.0704 | 0.0531 | 0.0636 |
 
 | measure | pearson_real_vs_sim |
 |---|---|
-| empty share by hour of day | 0.873 |
-| full share by hour of day | 0.931 |
+| empty share by hour of day | 0.875 |
+| full share by hour of day | 0.925 |
 
 ## E3. Baseline scenario (demand scale 1.0, 6 transfers per round, 100 replications, 5 simulated days each)
 
@@ -72,13 +72,13 @@ Lost pickups = riders who wanted a bike at an empty station. 'avoided' = reducti
 
 | policy | service_level | lost_pickups_per_day | stockout_station_hours_per_day | transfers_per_day | avoided_vs_none | avoided_ci_lo | avoided_ci_hi | sd_across_replications |
 |---|---|---|---|---|---|---|---|---|
-| none | 0.7875 | 2725 | 524.7 | 0 | 0 | 0 | 0 | 0 |
-| static | 0.7899 | 2696 | 513.5 | 16.8 | 29.45 | 24.64 | 34.26 | 24.54 |
-| reactive | 0.7978 | 2599 | 491.8 | 24 | 126.5 | 119.7 | 133.3 | 34.72 |
-| forecast_1h | 0.7988 | 2586 | 490.7 | 24 | 139.1 | 132.2 | 146.1 | 35.54 |
-| forecast_3h | 0.7995 | 2578 | 489.5 | 23.88 | 147.5 | 140.2 | 154.7 | 37.09 |
-| forecast_6h | 0.7926 | 2665 | 503.7 | 21.3 | 60.79 | 53.81 | 67.76 | 35.6 |
-| oracle_3h | 0.7998 | 2573 | 488.8 | 23.94 | 152 | 145.5 | 158.5 | 33.38 |
+| none | 0.7982 | 2605 | 528.9 | 0 | 0 | 0 | 0 | 0 |
+| static | 0.8 | 2582 | 520.1 | 18.24 | 22.62 | 18.64 | 26.6 | 20.3 |
+| reactive | 0.8056 | 2512 | 503.9 | 24 | 92.85 | 85.55 | 100.1 | 37.24 |
+| forecast_1h | 0.8069 | 2495 | 500.4 | 24 | 109.8 | 103.2 | 116.3 | 33.51 |
+| forecast_3h | 0.8081 | 2479 | 499.7 | 23.58 | 125.6 | 118.8 | 132.5 | 34.83 |
+| forecast_6h | 0.8012 | 2568 | 511.4 | 19.87 | 37.08 | 30.42 | 43.74 | 33.99 |
+| oracle_3h | 0.8091 | 2467 | 498 | 23.66 | 138 | 131.2 | 144.7 | 34.54 |
 
 ### E3b. Does forecasting add anything beyond reacting to current counts?
 
@@ -86,11 +86,11 @@ Positive = fewer lost pickups per day than the reactive policy. Interval = 95% c
 
 | policy | extra_lost_pickups_avoided_per_day_vs_reactive | lo95 | hi95 |
 |---|---|---|---|
-| static | -97.08 | -104.6 | -89.58 |
-| forecast_1h | 12.59 | 7.399 | 17.78 |
-| forecast_3h | 20.95 | 13.95 | 27.95 |
-| forecast_6h | -65.74 | -72.73 | -58.76 |
-| oracle_3h | 25.48 | 19.51 | 31.44 |
+| static | -70.23 | -77.89 | -62.58 |
+| forecast_1h | 16.92 | 12.34 | 21.49 |
+| forecast_3h | 32.78 | 26.25 | 39.31 |
+| forecast_6h | -55.77 | -63.06 | -48.49 |
+| oracle_3h | 45.12 | 38.87 | 51.36 |
 
 ## E4. Sensitivity to demand scale and rebalancing budget (40 replications per cell)
 
@@ -98,13 +98,13 @@ Demand scale 1.0 = counted pickups; higher values assume true demand is larger t
 
 | demand_scale | transfers_per_round | lost_per_day_none | lost_per_day_reactive | lost_per_day_forecast_3h | lost_per_day_oracle_3h | reactive_avoids_vs_none | forecast_3h_beats_reactive_by | fc_lo95 | fc_hi95 | oracle_beats_reactive_by | or_lo95 | or_hi95 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | 3 | 2661 | 2587 | 2581 | 2576 | 73.41 | 6.055 | -3.498 | 15.61 | 11.11 | 1.846 | 20.37 |
-| 1 | 6 | 2661 | 2536 | 2523 | 2508 | 124.8 | 12.97 | 1.936 | 24.01 | 27.45 | 17.06 | 37.83 |
-| 1 | 12 | 2661 | 2468 | 2428 | 2398 | 192.8 | 40.05 | 27.73 | 52.38 | 70.13 | 60.35 | 79.91 |
-| 1.5 | 3 | 5123 | 5062 | 5058 | 5057 | 61.12 | 4.385 | -8.397 | 17.17 | 4.93 | -8.731 | 18.59 |
-| 1.5 | 6 | 5123 | 5021 | 5012 | 4996 | 102 | 9.44 | -5.752 | 24.63 | 24.71 | 11.23 | 38.2 |
-| 1.5 | 12 | 5123 | 4979 | 4920 | 4904 | 144 | 59.12 | 43.27 | 74.96 | 75.58 | 58.31 | 92.86 |
-| 2 | 3 | 8128 | 8076 | 8066 | 8071 | 52.04 | 10.8 | -6.66 | 28.27 | 5.605 | -12.65 | 23.86 |
-| 2 | 6 | 8128 | 8046 | 8036 | 8014 | 82.28 | 10.02 | -10.51 | 30.55 | 31.93 | 10.73 | 53.13 |
-| 2 | 12 | 8128 | 8027 | 7947 | 7935 | 101.4 | 79.88 | 52.2 | 107.6 | 91.65 | 66.08 | 117.2 |
+| 1 | 3 | 2551 | 2494 | 2483 | 2473 | 56.65 | 10.79 | 3.594 | 17.98 | 21.16 | 12.99 | 29.32 |
+| 1 | 6 | 2551 | 2455 | 2419 | 2412 | 95.99 | 36.3 | 26.36 | 46.25 | 42.51 | 31.32 | 53.7 |
+| 1 | 12 | 2551 | 2399 | 2321 | 2302 | 152.3 | 77.35 | 66.69 | 88 | 96.3 | 86.23 | 106.4 |
+| 1.5 | 3 | 5036 | 5014 | 4984 | 4981 | 22.12 | 30.64 | 20.64 | 40.65 | 32.73 | 23.45 | 42.02 |
+| 1.5 | 6 | 5036 | 4975 | 4930 | 4922 | 60.94 | 45.51 | 28.84 | 62.17 | 53.59 | 36.55 | 70.62 |
+| 1.5 | 12 | 5036 | 4939 | 4843 | 4822 | 96.81 | 96.76 | 73.82 | 119.7 | 117 | 95.74 | 138.2 |
+| 2 | 3 | 8266 | 8244 | 8216 | 8221 | 22.2 | 28.02 | 10.93 | 45.12 | 22.52 | 5.807 | 39.24 |
+| 2 | 6 | 8266 | 8222 | 8178 | 8172 | 43.94 | 43.83 | 24.86 | 62.8 | 50.38 | 32.66 | 68.1 |
+| 2 | 12 | 8266 | 8186 | 8087 | 8083 | 79.69 | 99.36 | 74.6 | 124.1 | 103.3 | 79.49 | 127.1 |
 

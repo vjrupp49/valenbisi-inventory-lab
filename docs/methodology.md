@@ -8,7 +8,7 @@ Status: describes what the code does today. Where something is a plan, it says s
   actual cadence is measured, see `fct_run_health`).
 - No trip data. Activity is inferred from changes in bike counts between consecutive snapshots, and only
   when the snapshots are at most 30 minutes apart. It is a lower bound on true trips.
-- `last_reported` is NOT a freshness signal: on the first 15 days it barely moved when bike counts did
+- `last_reported` is NOT a freshness signal: on the first 15 days (and again on 33) it barely moved when bike counts did
   (see `docs/data_integrity_report.md`, section C), so it is kept only as an information column.
   Data quality is judged by whether a station's bike count has been unchanged for a long time: flagged at 6 h
   (`is_stuck`), excluded from headline stockout/blockout rates at 12 h (`is_stuck_excluded`). Decisions and reasons:

@@ -6,7 +6,12 @@ suppressMessages({library(ggplot2); library(dplyr); library(scales)})
 cache <- file.path("reports", "_cache")
 out   <- file.path("docs", "figures")
 dir.create(out, showWarnings = FALSE, recursive = TRUE)
-subtitle <- "Frozen dataset data-freeze-2026-10-24, 15 complete days. Stockouts are lower bounds (short ones can be missed)."
+# Day counts come from table S1 of docs/service_level_results.md so the subtitles cannot go stale.
+FREEZE <- "data-freeze-2026-11-11"   # git tag the results come from; update with each new freeze
+s1 <- grep("^[|] (weekday|weekend|holiday) [|]", readLines(file.path("docs", "service_level_results.md"), encoding = "UTF-8"), value = TRUE)
+parts <- strsplit(s1, "|", fixed = TRUE)
+n_days <- setNames(as.integer(sapply(parts, function(x) trimws(x[3]))), sapply(parts, function(x) trimws(x[2])))
+subtitle <- paste0("Frozen dataset ", FREEZE, ", ", sum(n_days), " complete days. Stockouts are lower bounds (short ones can be missed).")
 
 # 1. City-wide stockout and blockout rate by Madrid hour, weekday vs weekend (median across days, ribbon = min to max)
 h <- read.csv(file.path(cache, "hourly_summary.csv")) %>% filter(day_type %in% c("weekday", "weekend"))
@@ -22,7 +27,7 @@ p1 <- ggplot(long, aes(hour_of_day, med, colour = day_type, fill = day_type)) +
   scale_x_continuous(breaks = seq(0, 23, 3)) +
   labs(x = "Hour of day (Madrid time)", y = "Share of station-snapshots", colour = NULL, fill = NULL,
        title = "Empty and full stations by hour of day",
-       subtitle = paste0(subtitle, "\nLine = median across days; ribbon = lowest to highest day. 9 weekdays, 5 weekend days.")) +
+       subtitle = paste0(subtitle, "\nLine = median across days; ribbon = lowest to highest day. ", n_days[["weekday"]], " weekdays, ", n_days[["weekend"]], " weekend days (plus holidays, not plotted).")) +
   theme_minimal(base_size = 11) + theme(legend.position = "bottom", plot.subtitle = element_text(size = 8))
 ggsave(file.path(out, "hourly_service_level.png"), p1, width = 9, height = 4.6, dpi = 130)
 

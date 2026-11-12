@@ -1,0 +1,17 @@
+{
+  "n_stations_simulated": 271,
+  "n_stations_excluded_low_exposure": 1,
+  "n_days_used": 15,
+  "jump_threshold_bikes": 8,
+  "jumps_up_per_day": 27.466666666666665,
+  "jumps_down_per_day": 27.266666666666666,
+  "counted_pickups_per_station_day_mean": 46.71125340833288,
+  "counted_returns_per_station_day_mean": 43.9565436071206,
+  "sigma_city_day": 0.2944350756413996,
+  "sigma_station_day": 0.1755664934701649,
+  "hourly_dispersion": 0.29831907666882895,
+  "night_station_level_bikes": 7.5826948843141935,
+  "day_mean_station_level_bikes": 6.964419063441535,
+  "trip_hours": 0.3176669136070908,
+  "capacity_mean": 19.73431734317343
+}

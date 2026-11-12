@@ -1,7 +1,7 @@
 # Master project timeline and outline
 
 The one page to open when you want to know where the project stands. Update it at the end of every phase.
-**Last updated: 2026-11-04 (after Phase 7).** Repository: https://github.com/vjrupp49/valenbisi-inventory-lab
+**Last updated: 2026-11-12 (after the second freeze and 33-day re-run).** Repository: https://github.com/vjrupp49/valenbisi-inventory-lab
 
 ## 1. The project in one paragraph
 Valencia's bike-share system (Valenbisi) treated as an inventory problem: each station is a shelf, bikes are stock,
@@ -11,11 +11,11 @@ tables; analyses measure service levels, segment stations, forecast stockouts an
 The goal is a portfolio piece for data, analytics and operations roles, where **honesty about limits matters more than
 impressive numbers**.
 
-## 2. Where we are (snapshot, 2026-11-04)
-- **Collection:** running automatically since 2026-10-09. 3,756 runs so far, 3,752 successful; 27 UTC days of data. The four failures were an outage on the data provider's side (HTTP 503, Nov 2 to 3).
-- **Analysis:** data audit, descriptive results, station segmentation, a first real forecast and a data-based rebalancing simulation are done, each with a written findings document.
-- **Not yet done:** the final write-up and interview story, and the 30/60/90-day re-runs.
-- **Quality gates in place:** 43 automated tests, continuous-integration checks on every push (green), a daily health check on collection, a frozen reproducible dataset.
+## 2. Where we are (snapshot, 2026-11-12)
+- **Collection:** running automatically since 2026-10-09. The second frozen dataset holds 4,748 snapshots over 34 UTC days (to Nov 11). Four runs failed in the data (a provider outage, HTTP 503, Nov 2 to 3), and a 50-minute GitHub Actions outage on Nov 11 left a gap; collection recovered by itself both times.
+- **Analysis:** data audit, descriptive results, station segmentation, a real forecast and a data-based rebalancing simulation are done, each with a written findings document, and all were re-run on the second freeze (33 days).
+- **Not yet done:** the 60- and 90-day re-runs, and anything that needs more than one autumn month (seasons, weather, holidays).
+- **Quality gates in place:** 50 automated tests, continuous-integration checks on every push (green), a daily health check on collection, a frozen reproducible dataset.
 
 ### Progress by phase
 | # | Phase | Status | Finished | Key document |
@@ -31,8 +31,8 @@ impressive numbers**.
 | 6 | Forecast backtest on real data | Done (first version) | 2026-11-04 | [forecast_findings.md](forecast_findings.md) |
 | 7 | Rebalancing simulation using measured inputs | Done (first version) | 2026-11-04 | [simulation_findings.md](simulation_findings.md) |
 | 8 | Dashboard (local) | Done | 2026-11-04 | `dashboard/app.R` |
-| 9 | Write-up and interview story | Not started | | |
-| 10 | Keep collecting; re-run at 30, 60, 90 days | Planned | first re-run about 2026-11-10 | [analysis_plan.md](analysis_plan.md) |
+| 9 | Write-up and interview story | Done (first version; numbers refreshed 2026-11-12) | 2026-11-05 | [case_study.md](case_study.md), [interview_script.md](interview_script.md) |
+| 10 | Keep collecting; re-run at 30, 60, 90 days | **Running** (30-day re-run done 2026-11-12) | next: about 2026-12-10 | [analysis_plan.md](analysis_plan.md), [archive/freeze-2026-10-24/](archive/freeze-2026-10-24/) |
 
 Rough completion: the analysis core (phases 0 to 6) is done; what remains is the simulation, the presentation layer,
 and the long-run re-checks. The re-checks are what turns a two-week snapshot into a year-long study.
@@ -49,24 +49,27 @@ and the long-run re-checks. The re-checks are what turns a two-week snapshot int
 | 2026-11-02 to 03 | Provider outage (503) caused 4 failed runs; collection resumed unaided. |
 | 2026-11-04 | Segmentation stability and the first real forecast results. This timeline written. |
 | 2026-11-04 | Phase 7: data-based simulation. Two realism fixes along the way (bike conservation; no free rebalancing of displaced bikes). |
+| 2026-11-04 to 05 | Phase 8 (local dashboard) and Phase 9 (case study, interview script, README rewritten as a landing page). |
+| 2026-11-11 | A 50-minute GitHub Actions outage (4 failed runs, 4 snapshots lost); recovered unaided. |
+| 2026-11-12 | Second freeze `data-freeze-2026-11-11` (33 complete days). Whole analysis re-run; 15-day results kept in `docs/archive/freeze-2026-10-24/`. |
 
-## 4. What the project has found so far (all from scripts on the frozen 15-day dataset)
-- Stations are empty about 13% of the time and full about 7%; strongly time-of-day dependent; concentrated in a few stations.
+## 4. What the project has found so far (all from scripts on the frozen 33-day dataset)
+- Stations are empty about 13% of the time and full about 6%; strongly time-of-day dependent; concentrated in a few stations.
 - The feed's `last_reported` field is unreliable as a freshness signal, which changed our data-quality method.
 - Station activity ranking is very stable; the A/B/C labels are softer; the XYZ steadiness split barely separates stations.
-- A forecast of "any stockout next hour" beats simple baselines by about 16% on Brier score, with the advantage fading by 3 to 6 hours.
+- A forecast of "any stockout next hour" beats simple baselines by about 17% on Brier score, with the advantage fading by 3 hours and gone by 6 (a weekly-pattern average is slightly better at 6 hours).
 - In a simulation of the network (assumption-bound; it understates empty stations), forecast-driven rebalancing beats reactive rebalancing by a small amount, and the rebalancing budget matters more than forecast accuracy.
 Details and caveats are in the findings documents. Every number must come from a script in this repo.
 
 ## 5. What is coming, in order
 ### Immediate (the next working session)
-1. **Second freeze and re-run (~2026-11-10).** Re-run the audit, service-level results, segmentation, forecast and simulation on 30 days of data.
-2. **Housekeeping.** Close GitHub issue #2 (old false alarm).
+1. **Done 2026-11-12:** second freeze and full re-run (33 days).
+2. **Done 2026-11-05:** GitHub issue #2 (old false alarm) closed.
 
 ### Short term (November to December 2026)
-3. **~2026-11-10: second freeze (30 days of steady collection, counting from 2026-10-10)** with a new tag (for example `data-freeze-2026-11-09`), then re-run the audit, service-level results, segmentation and forecast. Report what held up and what changed.
+3. **Done 2026-11-12: second freeze (tag `data-freeze-2026-11-11`).** Everything re-run; what held and what changed is in each findings document's "What changed with more data" section.
 4. **Phase 8, dashboard.** Done 2026-11-04 (local only). Publishing it publicly needs your explicit go-ahead.
-5. **Phase 9, write-up.** Case-study page, README polish, one-page interview script (including the staleness story and why results are modest).
+5. **Phase 9, write-up.** Done (first version, 2026-11-05); numbers refreshed on 2026-11-12.
 6. **~2026-12-10: third freeze (60 days).** Then watch the Christmas and school-holiday period (exact dates to confirm), which falls in the 60 to 90 day window.
 
 ### Medium term (January to April 2027)
@@ -102,18 +105,18 @@ Details and caveats are in the findings documents. Every number must come from a
 | Report uncertainty by resampling days; add a placebo check | Few days, so be modest and check for leaks | forecast_findings.md |
 
 ## 8. Known limits and open questions
-- **Short history:** one autumn month so far. No season, weather or holiday conclusions. Only 3 light rainy days.
+- **Short history:** one autumn month so far. No season, weather or holiday conclusions. Only light rain (at most 2.3 mm in a reading).
 - **No trip data and no truck data:** activity is a lower bound; rebalancing effects cannot be measured, only simulated under stated assumptions.
 - **Short stockouts are missed** at 10-minute sampling, so stockout rates are lower bounds.
-- **Forecast results come from 9 test days;** intervals are probably too narrow. The model mostly tracks "nearly empty and dropping", not weekly routine.
+- **Forecast results come from 27 test days;** intervals are probably too narrow. The model mostly tracks "nearly empty and dropping", not weekly routine.
 - **Open:** does `last_reported` refresh in a daily batch (hypothesis, unproven)? Do the early-morning jumps in bike counts reflect truck rebalancing (hypothesis, no truck data)?
-- **Dependence on two outside services:** the data provider (outages happen; one so far) and the Cloudflare timer (token expiry 2027-03-01).
+- **Dependence on outside services:** the data provider (one outage so far), GitHub Actions (one short outage so far) and the Cloudflare timer (token expiry 2027-03-01).
 
 ## 9. What "done" looks like for the portfolio version (v1)
 - [x] Phase 7 simulation with measured inputs and a sensitivity analysis (first version)
 - [x] Phase 8 dashboard finished and tested locally
 - [x] Phase 9 case study, README polish, interview script (first version; refresh numbers after each re-run)
-- [ ] 30-day re-run completed and compared with the 15-day results
+- [x] 30-day re-run completed and compared with the 15-day results
 - [ ] You can explain, without notes: what a stockout is here, why `last_reported` was dropped, why the forecast was tested the way it was, and what the results cannot show
 A decision for later: whether to publish a public dashboard or page (needs your explicit go-ahead; currently not allowed by the project rules).
 

@@ -22,6 +22,7 @@ out <- file.path("docs", "figures"); dir.create(out, showWarnings = FALSE, recur
 files <- c("1 hour ahead" = "forecast_results.md", "3 hours ahead" = "forecast_results_h3.md", "6 hours ahead" = "forecast_results_h6.md")
 f <- bind_rows(lapply(names(files), function(h) mutate(md_table(files[[h]], "F1"), horizon = h)))
 f$horizon <- factor(f$horizon, names(files))
+n_test <- sub(".*, ([0-9]+) test days.*", "\\1", grep("test days", readLines("docs/forecast_results.md", encoding = "UTF-8"), value = TRUE)[1])
 f$model <- factor(f$model, c("gbm", "station_state", "persistence", "hour_of_week", "station_mean"),
                   c("Gradient boosting", "Station state", "Persistence", "Hour-of-week average", "Station average"))
 p1 <- ggplot(f, aes(model, brier, fill = model == "Gradient boosting")) +
@@ -31,7 +32,7 @@ p1 <- ggplot(f, aes(model, brier, fill = model == "Gradient boosting")) +
   facet_wrap(~horizon) + coord_flip() +
   labs(x = NULL, y = "Brier score (lower is better); bars = 95% interval from resampling test days",
        title = "Forecasting an empty station: a clear edge at 1 hour that fades by 6",
-       subtitle = "Rolling-origin backtest on 9 test days, frozen dataset data-freeze-2026-10-24. Early result from one autumn month.") +
+       subtitle = paste0("Rolling-origin backtest on ", n_test, " test days, frozen dataset data-freeze-2026-11-11. Early result from about a month of autumn data.")) +
   theme_minimal(base_size = 11) + theme(plot.subtitle = element_text(size = 8))
 ggsave(file.path(out, "forecast_brier.png"), p1, width = 10, height = 4.2, dpi = 130)
 

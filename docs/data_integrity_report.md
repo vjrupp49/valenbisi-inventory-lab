@@ -5,6 +5,11 @@ Numbers: all from `src/audit/run_audit.py`, shown in full in [data_integrity_res
 (check IDs like **C3** point to the table there). Anything marked **Hypothesis** is a guess to test, not a finding.
 Times are UTC; Madrid was UTC+2 during this period.
 
+> **This report describes the first frozen dataset (15 days).** Its check IDs refer to the tables in
+> [archive/freeze-2026-10-24/data_integrity_results.md](archive/freeze-2026-10-24/data_integrity_results.md).
+> [data_integrity_results.md](data_integrity_results.md) now holds the audit re-run on the second freeze (33 days);
+> see "Re-run on the second freeze" at the end for what changed.
+
 ## The short version
 1. **Collection is solid.** 2,168 snapshots, no failed runs, no duplicates, no missing values, and our own cleaned tables match the raw data exactly.
 2. **Bike counts look live, but our "stale" flag is useless.** The `last_reported` field barely moves when bike counts do, so flagging 94% of station readings as stale (the 1-hour rule) throws away information instead of protecting us. This changes how we define data quality (Phase 3).
@@ -91,3 +96,20 @@ Times are UTC; Madrid was UTC+2 during this period.
 
 ## What would change this picture
 More days, especially more rain, a school-holiday week, and a different season; and any ground truth about whether counts are accurate (for example spot-checking a station against the official app).
+
+## Re-run on the second freeze (2026-11-12)
+Dataset `data-freeze-2026-11-11`: every snapshot from 2026-10-09 05:58 UTC through 2026-11-11 23:50 UTC. Numbers: [data_integrity_results.md](data_integrity_results.md), same checks as above.
+
+**The conclusions hold.**
+- **Completeness:** 4,748 snapshots, 1,314,403 station rows, 278 stations (A1). No duplicates, no nulls, no repeated feed timestamps (A6, A7). Our dbt tables match the raw data exactly (G1). The feed's own timestamp stays fresh (median 0.7 s, 99th percentile 45 s) (A7b).
+- **Failed runs:** 4 of 4,752 runs failed, all ok runs have station rows (A5). Those 4 are the provider outage of Nov 2 to 3, logged in PROGRESS.md.
+- **Gaps:** 11 gaps over 15 minutes (A3b): the 3 early ones on Oct 9, before the timer, and 8 since, all between 20 and 50 minutes. They include the Nov 11 GitHub Actions outage (50 minutes). The median spacing is 10 minutes and the 99th percentile 10.7 minutes (A3).
+- **`last_reported` is still not a freshness signal:** it moved in 3.4% of the intervals where the bike count changed (C3b), and flagging "stale after 1 hour" would still label 93% of readings stale (C2).
+- **Frozen counts:** the share of readings whose bike count had not changed for 6 hours is 3.0%, and for 12 hours 0.65% (D8), close to the first freeze (3.3% and 0.7%).
+- **Stockouts:** 13.2% of renting rows are at zero bikes and 6.5% of returning rows have no free dock, raw (D4). A third of stockout episodes (10,108 of 30,581) are a single snapshot, so shorter ones are probably missed (D5).
+
+**New things the longer window shows.**
+- **The clock change is now inside the data (A8).** Madrid hour 2 on Oct 25 happens twice, as predicted. Because the hourly table is built on UTC hours, no hour was merged or invented; the dbt tests on 25- and 23-hour days cover this.
+- **One more station appeared, once:** station 299 shows up in a single snapshot on Oct 28 (B7) and never again. It is why one station has a 100% blockout rate on one eligible snapshot in the service-level tables, and it should be ignored. Station 18 (first seen Oct 15) has been present since (B7).
+- **Weather:** 4 of 4,752 runs lack weather, temperatures range from 11.4 to 27.6 C, and 400 runs recorded rain with at most 2.3 mm (E1). That is still too little rain to test a weather effect.
+- **The limit is still time:** about a month of one season. The second freeze removed the "two weekly cycles" limit but not the "one season" limit.

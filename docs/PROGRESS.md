@@ -129,3 +129,11 @@
 ## 2026-11-12 Check-in after failure emails
 - Cause: 2026-11-11 20:20 to 20:50 UTC, four ingest runs failed (3 `startup_failure` "workflow file issue", 1 job failure with no logs). The same workflow file succeeded before and after unchanged, so this looks like a GitHub Actions platform blip, not a code or timer problem. Collection resumed unaided at 21:00; 4 snapshots lost (gap 20:10 to 21:00). Since Nov 10: 196 successful ingest runs of 200. Health watchdog and CI green. No change made.
 - Pending: second data freeze and 30-day re-run (was due ~Nov 10).
+
+## 2026-11-12 Second freeze and full re-run (33 days)
+- Tag `data-freeze-2026-11-11` (commit 7d39358, last snapshot 2026-11-11 23:50 UTC) created on the data branch and pushed; local worktree `data_frozen_30d/` (gitignored via `data_frozen*/`). dbt build on it: 46 pass, 1 warning (`assert_no_long_run_gaps`: gaps from the Nov 2 to 3 and Nov 11 outages, expected).
+- Re-ran audit, service level, segmentation, forecast (1/3/6 h), simulation, figures and dashboard export. The 15-day results are archived in docs/archive/freeze-2026-10-24/ (results tables, figures, simulation inputs).
+- What held: about 13% empty / 6% full; strong daily pattern; `last_reported` still not a freshness signal; forecast 16.7% better Brier than best baseline at 1 h (AUC 0.93, 27/27 test days won); segmentation rank very stable; strategy ordering in the simulation unchanged.
+- What changed: worst stations less extreme (30 stations empty at least a quarter of the time, was 36; none above half); at 6 h the GBM is now slightly worse than the weekly-pattern average (-5.0%, CI -8.6% to -0.6%), was a tie; XYZ labels steadier but still 96% X; in the simulation reactive avoids 3.6% of lost pickups (was 4.6%) and the 3-hour forecast edge is 33 a day (was 21), so effect sizes are not stable, ordering is.
+- Updated findings docs, README, case study, interview script, dataset card, master timeline. Figure scripts now read day counts from the results files (analysis/plot_service_level.R, plot_model_results.R). dashboard/data re-exported (gitignored).
+- Open: station 299 appears in one snapshot on Oct 28; harmless, but it shows up as a 100% blockout station with one eligible row in service-level tables.

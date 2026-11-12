@@ -9,10 +9,10 @@
 ## The results in 30 seconds
 | Question | Answer |
 |---|---|
-| How bad is service? | Stations are **empty about 13% of the time** and full about 7%, with a strong daily pattern. 36 of 272 stations are empty at least a quarter of the time. |
-| Can empty stations be forecast? | **Yes, one hour ahead:** AUC 0.93, and 16.5% better Brier score than the best simple baseline (95% interval 15.2% to 18.3%). The edge fades by 3 to 6 hours. |
-| Would forecasts improve rebalancing? | **Only a little.** In a simulation, planning with a 3-hour forecast beats simply reacting to current counts by about 21 lost pickups a day (95% interval 14 to 28), under 1%. **The number of trucks matters far more than forecast quality.** |
-| What was surprising about the data? | The feed's `last_reported` timestamp looks like a freshness flag but is not: it changed in only 3.5% of the intervals where bike counts changed. Using it would have discarded 94% of readings, so freshness is judged by how long a count has been frozen. |
+| How bad is service? | Stations are **empty about 13% of the time** and full about 6%, with a strong daily pattern. 30 of 273 stations are empty at least a quarter of the time. |
+| Can empty stations be forecast? | **Yes, one hour ahead:** AUC 0.93, and 16.7% better Brier score than the best simple baseline (95% interval 15.9% to 17.5%). The edge fades by 3 hours and is gone by 6. |
+| Would forecasts improve rebalancing? | **Only a little.** In a simulation, planning with a 3-hour forecast beats simply reacting to current counts by about 33 lost pickups a day (95% interval 26 to 39), about 1%. **The number of trucks matters far more than forecast quality.** |
+| What was surprising about the data? | The feed's `last_reported` timestamp looks like a freshness flag but is not: it changed in only 3.4% of the intervals where bike counts changed. Using it would have discarded 93% of readings, so freshness is judged by how long a count has been frozen. |
 
 ![Empty and full stations by hour of day](docs/figures/hourly_service_level.png)
 
@@ -21,8 +21,8 @@
 ![Simulation: forecast-driven versus reactive rebalancing](docs/figures/simulation_vs_reactive.png)
 
 ### Honest limits
-- **15 complete days in one autumn month.** No weather, holiday or seasonal conclusions yet; collection continues and the analysis will be re-run at 30, 60 and 90 days.
-- **The simulation compares strategies; it does not measure real savings.** It understates how often stations are empty (7.9% simulated against 13.3% real), and the truck budget is an assumption.
+- **33 complete days in one autumn month.** No weather, holiday or seasonal conclusions yet; collection continues and the analysis is re-run at each freeze (15 days, now 33; next at 60 and 90 days). The headline findings held from 15 to 33 days; the size of the simulation effects did not.
+- **The simulation compares strategies; it does not measure real savings.** It understates how often stations are empty (7.7% simulated against 12.8% real), and the truck budget is an assumption.
 - **No trip or truck data.** Activity is inferred from changes in bike counts, a lower bound on true trips.
 - Stockouts shorter than the 10-minute sampling can be missed, so rates are lower bounds.
 
