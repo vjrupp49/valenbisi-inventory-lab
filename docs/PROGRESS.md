@@ -137,3 +137,5 @@
 - What changed: worst stations less extreme (30 stations empty at least a quarter of the time, was 36; none above half); at 6 h the GBM is now slightly worse than the weekly-pattern average (-5.0%, CI -8.6% to -0.6%), was a tie; XYZ labels steadier but still 96% X; in the simulation reactive avoids 3.6% of lost pickups (was 4.6%) and the 3-hour forecast edge is 33 a day (was 21), so effect sizes are not stable, ordering is.
 - Updated findings docs, README, case study, interview script, dataset card, master timeline. Figure scripts now read day counts from the results files (analysis/plot_service_level.R, plot_model_results.R). dashboard/data re-exported (gitignored).
 - Open: station 299 appears in one snapshot on Oct 28; harmless, but it shows up as a 100% blockout station with one eligible row in service-level tables.
+
+- Social preview image for the GitHub repo made by analysis/make_social_preview.R (docs/figures/social_preview.png) and uploaded in the repo settings on 2026-11-12.
